@@ -208,6 +208,10 @@ public class Message {
         //return ((isPublic)?(sender + " dice: "):("Mensaje privado de " + sender + ": ")) + text;
     }
     
+    public String toMessage(){
+        return kind.toString() + IO_LIM + sender + IO_LIM + text + IO_LIM +  df.format(date) + IO_LIM;
+    }
+    
     /**
      * Obtains a string with all the message information.
      * @return String with message info.

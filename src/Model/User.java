@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,8 @@ import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Class user. It contains information related to a user's state in the MSN.
@@ -64,6 +67,9 @@ public class User {
      */
     private static final String IO_LIM = "\0";
     
+    
+    private Socket userSocket;
+    
     /**
      * Randomizer.
      */
@@ -75,23 +81,31 @@ public class User {
      * Creates a disconnected user with an invalid state, just the id is set.
      * @param uid User's id.
      */
-    public User(int uid){
-        this.uid = uid;
+    public User(){
+        this.uid = -1;
         this.name = "";
         this.state = UserState.OFF;
         this.current_time = null;
+        userSocket = null;
     }
     
     /**
      * Constructor
      * @param name User's name.
      */
-    public User(String name) throws UserOverflowException{
+    public User(String name){
         this.name = name;
-        this.uid = getNewId();
         this.state = UserState.ONLINE;
         this.current_time = new Date();
-        if(uid != -1) write();
+        try {
+            userSocket = new Socket("localhost",8989);
+        } catch (IOException ex) {
+            System.err.println("Error al crear el socket.");
+        }
+    }
+
+    public Socket getUserSocket() {
+        return userSocket;
     }
     
     // ---------- GETTER METHODS ---------- //

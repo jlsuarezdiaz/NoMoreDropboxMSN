@@ -52,7 +52,8 @@ public class ServerData {
     private void setNumUsers(int numUsers) {
         this.numUsers = numUsers;
     }
-    
+
+        
     public int addUser(String name){
         if(numUsers==getMAX_USERS()){
             return -1;
@@ -102,5 +103,17 @@ public class ServerData {
         return selectedUsers[id][idChange];
     }
     
+    UserState changeState(int id, UserState state) {
+        user_list[id].changeState(state);
+        return user_list[id].getState();
+    }
+    
+    public void removeUser(int id){
+        user_list[id] = new User();
+    }
+    
+    public void updateUser(int id){
+        user_list[id].update();
+    }
     
 }

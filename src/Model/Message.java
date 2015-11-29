@@ -23,15 +23,11 @@ import java.util.Scanner;
  * @author Juan Luis
  */
 public class Message {
-    /**
-     * Sender's name
-     */
-    private String sender;
-    
+        
     /**
      * Message contents.
      */
-    private String text;
+    private String[] messageData;
     
     /**
      * Indicates de message modality.
@@ -59,18 +55,17 @@ public class Message {
      * @param text
      * @param isPublic 
      */
-    private void set(String sender, String text, MessageKind kind){
-        this.sender = "".equals(sender)?" ":sender;
-        this.text = "".equals(text)?" ":text;
+    private void set(MessageKind kind, String[] msgData){
         this.kind = kind;
         this.date = new Date();
+        this.messageData=msgData;
     }
     
     /**
      * Default constructor.
      */
     public Message(){
-        set("","",MessageKind.PUBLIC);
+        set(MessageKind.ERR,null);
     }
     /**
      * Constructor.
@@ -78,8 +73,8 @@ public class Message {
      * @param text
      * @param isPublic 
      */
-    public Message(String sender, String text, MessageKind kind){
-        set(sender,text,kind);
+    public Message(MessageKind kind,String[] msgData){
+        set(kind,msgData);
     }
     
     /**
@@ -87,25 +82,25 @@ public class Message {
      * @param sender
      * @param text 
      */
-    public Message(String sender, String text){
+/*    public Message(String sender, String text){
         set(sender,text,MessageKind.PUBLIC);
-    }
+    }*/
     
     /**
      * 
      * @return sender 
      */
-    public String getSender(){
+/*    public String getSender(){
         return sender;
-    }
+    }*/
     
     /**
      * 
      * @return text. 
      */
-    public String getText(){
+/*    public String getText(){
         return text;
-    }
+    }*/
     
     /**
      * 
@@ -123,6 +118,10 @@ public class Message {
         return date;
     }
     
+    public String[] getMessageData(){
+        return messageData;
+    }
+    
     /**
      * 
      * @return Date format. 
@@ -135,7 +134,7 @@ public class Message {
      * Writes the message in a file.
      * @param filename File's name.
      */
-    public void write(String filename){
+/*    public void write(String filename){
         //FileWriter fw = null;
         OutputStreamWriter fw = null;
         try{
@@ -150,13 +149,13 @@ public class Message {
             }
             catch(IOException ex){}
         }
-    }
+    }*/
     
     /**
      * Reads the message from a file.
      * @param filename File's name.
      */
-    public void read(String filename){
+/*    public void read(String filename){
         Scanner scan = null;
         File f = new File(filename);
         
@@ -176,21 +175,21 @@ public class Message {
             }
             //System.out.println("Leido OK " + filename);
         }
-    }
+    }*/
     
     /**
      * Checks if a message is empty.
      * @return 
      */
-    public boolean isEmpty(){
+/*    public boolean isEmpty(){
         return ("".equals(this.sender) || " ".equals(this.sender)) && ("".equals(this.text) || " ".equals(this.text));
-    }
+    }*/
     
     /**
      * Obtains a string with the message.
      * @return String with the message.
      */
-    @Override
+/*    @Override
     public String toString(){
         String ret = "";
         if(kind == MessageKind.PUBLIC)
@@ -206,26 +205,31 @@ public class Message {
         
         return ret;
         //return ((isPublic)?(sender + " dice: "):("Mensaje privado de " + sender + ": ")) + text;
-    }
+    }*/
     
     public String toMessage(){
-        return kind.toString() + IO_LIM + sender + IO_LIM + text + IO_LIM +  df.format(date) + IO_LIM;
+        String str = kind.toString()+IO_LIM+getDateFormat().format(getDate())+IO_LIM;
+        if(messageData!=null)
+            for(String s:messageData){
+                str += s+"\0";
+            }
+        return str+"\0END\0";
     }
     
     /**
      * Obtains a string with all the message information.
      * @return String with message info.
      */
-    public String toStringXL(){
+/*    public String toStringXL(){
         return "[" + getDateFormat().format(getDate()) + "] " + toString();
-    }
+    }*/
     
     /**
      * Message comparer.
      * @param obj Object to compare
      * @return true if and only if messages are equal.
      */
-    @Override
+/*    @Override
     public boolean equals(Object obj){
         if(obj == null)
             return false;
@@ -237,5 +241,5 @@ public class Message {
         Message msg = (Message) obj;
         return this.sender.equals(msg.getSender()) && this.text.equals(msg.getText()) 
                 && this.kind.equals(msg.getKind()) && this.date.equals(msg.getDate());
-    }
+    }*/
 }

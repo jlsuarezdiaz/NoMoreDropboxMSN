@@ -30,7 +30,7 @@ public class User {
     /**
      * User's id.
      */
-    private int uid;
+    //private int uid;
     
     /**
      * User's name.
@@ -82,7 +82,7 @@ public class User {
      * @param uid User's id.
      */
     public User(){
-        this.uid = -1;
+        //this.uid = -1;
         this.name = "";
         this.state = UserState.OFF;
         this.current_time = null;
@@ -114,9 +114,9 @@ public class User {
      * Get User's id.
      * @return User's id.
      */
-    public int getUid(){
-        return uid;
-    }
+    //public int getUid(){
+    //    return uid;
+    //}
     
     /**
      * Get User's name.
@@ -179,7 +179,7 @@ public class User {
      * @return Integer with the new user id.
      * @throws Model.UserOverflowException
      */
-    public int getNewId() throws UserOverflowException{
+    /*public int getNewId() throws UserOverflowException{
         int rnd = rand.nextInt(MAX_USERS);
         int fnum;
         for(int i = 0; i < MAX_USERS; i++){
@@ -190,37 +190,32 @@ public class User {
             }
         }
         throw new UserOverflowException("No users space available.");
-    }
+    }*/
     
     /**
      * Updates user.
      * @throws Model.UserOverflowException
      */
-    public void update() throws UserOverflowException{
-        update(false);
-    }
+    //public void update(){
+    //    update(false);
+    //}
     
     /**
      * Updates user.
      * @param newid If it is true, user id is also updated.
      * @throws UserOverflowException 
      */
-    public void update(boolean newid) throws UserOverflowException{
-        erase();
+    public void update(){
         if(state != UserState.OFF){
-            if(newid) uid = getNewId();
             current_time = new Date();
         }
-        write();
     }
     
     /**
      * Updates user state.
-     * @throws Model.UserOverflowException
      */
-    public void changeState(UserState state) throws UserOverflowException{
+    public void changeState(UserState state){
         this.state = state;
-        update();
     }
     
     /**
@@ -233,24 +228,24 @@ public class User {
     /**
      * Erases the corresponding user file.
      */
-    public void erase(){
-        File f = new File("./"+getUserFile(uid));
-        f.setWritable(true);
-        f.delete();
-    }
+    //public void erase(){
+    //    File f = new File("./"+getUserFile(uid));
+    //    f.setWritable(true);
+    //    f.delete();
+    //}
     
     /**
      * Writes the corresponding user file and updates it.
      */
-    public void write(){
-        write(getUserFile(uid));
-    }
+    //public void write(){
+    //    write(getUserFile(uid));
+    //}
     
     /**
      * Writes to any file.
      * @param file 
      */
-    public void write(String file){
+    /*public void write(String file){
         //FileWriter fw = null;
         OutputStreamWriter fw = null;
         try{
@@ -269,20 +264,20 @@ public class User {
             }
             catch(IOException ex){}
         }
-    }
+    }*/
     
     /**
      * Reads the corresponding user file and updates the user.
      */
-    public void read(){
-        read(getUserFile(uid));
-    }
+    //public void read(){
+    //    read(getUserFile(uid));
+    //}
     
     /**
      * Reads an user from any file.
      * @param file 
      */
-    public void read(String file){
+    /*public void read(String file){
         Scanner scan = null;
         File f = new File(file);
         
@@ -308,7 +303,7 @@ public class User {
             name = "";
             state = UserState.OFF;
         }
-    }
+    }*/
     
     /**
      * Gets a string with user's info.
@@ -316,7 +311,7 @@ public class User {
      */
     @Override
     public String toString(){
-        return "User " + Integer.toString(uid) + "\nName: " + name + "\nState: "
+        return  "\nName: " + name + "\nState: "
                     + state.toString() + "\nLast update: " + df.format(current_time);
     }
 }

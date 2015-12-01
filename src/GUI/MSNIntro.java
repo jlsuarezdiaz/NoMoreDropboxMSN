@@ -21,12 +21,12 @@ public class MSNIntro extends javax.swing.JDialog {
     /**
      * User's name.
      */
-    User user;
+    private String user;
     
     /**
      * Checks if the name is ok.
      */
-    boolean validName;
+    private boolean validName;
     
     /**
      * Creates new form MSNIntro
@@ -190,7 +190,7 @@ public class MSNIntro extends javax.swing.JDialog {
      * Reads the user name and inits the messenger.
      */
     private void performReadName(){
-        user = new User(this.txtUserName.getText());
+        user = this.txtUserName.getName();
         this.dispose();
     }
     
@@ -222,7 +222,7 @@ public class MSNIntro extends javax.swing.JDialog {
      * Shows the view to get the user name.
      * @return 
      */
-    public User getUser(){
+    public String getUser(){
         this.setVisible(true);
         return user;
     }

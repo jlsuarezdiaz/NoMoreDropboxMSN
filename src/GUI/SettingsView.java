@@ -291,7 +291,7 @@ public class SettingsView extends javax.swing.JDialog {
      * @param evt 
      */
     private void BtUpdateUserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtUpdateUserActionPerformed
-        view.updateUserForced();
+//        view.updateUserForced();
     }//GEN-LAST:event_BtUpdateUserActionPerformed
 
     /**

@@ -208,12 +208,12 @@ public class Message {
     }*/
     
     public String toMessage(){
-        String str = kind.toString()+IO_LIM+getDateFormat().format(getDate())+IO_LIM;
+        String str = kind.toString()+ServerData.US+getDateFormat().format(getDate())+ServerData.US;
         if(messageData!=null)
             for(String s:messageData){
-                str += s+"\0";
+                str += s+ServerData.US;
             }
-        return str+"\0END\0";
+        return str+ServerData.GS;
     }
     
     /**

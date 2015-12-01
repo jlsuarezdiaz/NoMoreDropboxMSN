@@ -68,7 +68,7 @@ public class User {
     private static final String IO_LIM = "\0";
     
     
-    private Socket userSocket;
+ 
     
     /**
      * Randomizer.
@@ -86,7 +86,7 @@ public class User {
         this.name = "";
         this.state = UserState.OFF;
         this.current_time = null;
-        userSocket = null;
+
     }
     
     /**
@@ -97,16 +97,10 @@ public class User {
         this.name = name;
         this.state = UserState.ONLINE;
         this.current_time = new Date();
-        try {
-            userSocket = new Socket("localhost",8989);
-        } catch (IOException ex) {
-            System.err.println("Error al crear el socket.");
-        }
+
     }
 
-    public Socket getUserSocket() {
-        return userSocket;
-    }
+
     
     // ---------- GETTER METHODS ---------- //
     

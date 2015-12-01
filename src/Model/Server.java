@@ -8,6 +8,7 @@ package Model;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 
 /**
  *
@@ -31,6 +32,8 @@ public class Server {
             // Abrimos el socket en modo pasivo, escuchando el en puerto indicado por "port"
             //////////////////////////////////////////////////
             serverSocket=new ServerSocket(port);
+            System.out.println("["+Message.getDateFormat().format(new Date())+"] Server started.");
+
             //////////////////////////////////////////////////
 
             // Mientras ... siempre!

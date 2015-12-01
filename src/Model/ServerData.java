@@ -13,6 +13,11 @@ import java.util.ArrayList;
  * @author Juan Luis
  */
 public class ServerData {
+    //Delimiters for information in messages
+    public static final char US = 0x1F; //Unit separator (each piece of information)
+    public static final char RS = 0x1E; //Record separator (groups of information)
+    public static final char GS = 0x1D; //Group separator (ends a complete message)
+    public static final char FS = 0x1C; //File separator 
     /**
      * Max users allowed.
      */
@@ -22,6 +27,8 @@ public class ServerData {
      * Users list in the messenger.
      */
     private User[] user_list = new User[MAX_USERS];
+    
+    private Socket userSockets[] = new Socket[MAX_USERS];
     
     int numUsers;
     
@@ -79,14 +86,14 @@ public class ServerData {
         if(!privateMode[id]){
             for(int i = 0; i < MAX_USERS; i++){
                 if(user_list[i].validState()){
-                    sendSocket.add(user_list[i].getUserSocket());
+                    sendSocket.add(userSockets[i]);
                 }
             }
         }
         else{
             for(int i = 0; i < MAX_USERS; i++){
                 if(selectedUsers[id][i]){
-                    sendSocket.add(user_list[i].getUserSocket());
+                    sendSocket.add(userSockets[i]);
                 }
             }
         }

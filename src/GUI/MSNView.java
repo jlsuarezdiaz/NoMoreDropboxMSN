@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package GUI;
 
+import Model.ClientController;
 import Model.Message;
 import Model.MessageKind;
 import Model.User;
@@ -44,48 +45,8 @@ public class MSNView extends javax.swing.JFrame {
     /**
      * MSN Controller.
      */
-    private MSNController msn_ctrl;
+    private ClientController msn_ctrl;
    
-    /**
-     * Reader handler.
-     */
-    private final ActionListener taskReader;
-    
-    /**
-     * Private reader handler.
-     */
-    private final ActionListener taskPrivateReader;
-    
-    /**
-     * User updater handler.
-     */
-    private final ActionListener taskUserUpdater;
-    
-    /**
-     * User list updater handler.
-     */
-    private final ActionListener taskListUserUpdater;
-    
-    /**
-     * Reader timer.
-     */
-    private final Timer timerReader;
-    
-    /**
-     * Private reader timer.
-     */
-    private final Timer timerPrivateReader;
-    
-    /**
-     * User updater timer.
-     */
-    private final Timer timerUserUpdater;
-    
-    /**
-     * User list updater timer.
-     */
-    private final Timer timerListUserUpdater;
-    
     /**
      * State colors array.
      */
@@ -132,7 +93,7 @@ public class MSNView extends javax.swing.JFrame {
     /**
      * Action of sending a message.
      */
-    private void performSend(){
+/*    private void performSend(){
         if(BtPrivate.isSelected()){
             ArrayList <User> dest = getSelectedUsers();
             Message msg = new Message(msn_ctrl.getUser().getName(),TextMessage.getText(),MessageKind.PRIVATE);
@@ -149,7 +110,7 @@ public class MSNView extends javax.swing.JFrame {
         TextMessage.setText("");
         TextMessage.setCaretPosition(0);
         setValidText(false);
-    }
+    }*/
     
     /**
      * Updates the color of the user state combo box
@@ -183,29 +144,7 @@ public class MSNView extends javax.swing.JFrame {
      * Creates new form MSNView
      */
     public MSNView() {
-        this.taskReader = (ActionEvent evt) -> {
-            msn_ctrl.reader();
-        };
-        
-        this.taskPrivateReader = (ActionEvent evt) -> {
-            msn_ctrl.privateReader();
-        };
-        
-        this.taskUserUpdater = (ActionEvent evt) -> {
-            try {
-                msn_ctrl.updateUser();
-                MyUserPanel.setUser(msn_ctrl.getUser());
-            } catch (UserOverflowException ex) {
-                 showUserOverflowMsg(ex);
-                 msn_ctrl.stop();
-            }
-        };
-        
-        this.taskListUserUpdater = (ActionEvent evt) -> {
-            //fillUserPanel(msn_ctrl.getUserList());
-            updateUserPanel(msn_ctrl.getUserList());
-        };
-        
+               
         initComponents();
         
 
@@ -223,10 +162,6 @@ public class MSNView extends javax.swing.JFrame {
             }
         });
                 
-        timerReader = new Timer(100, taskReader);
-        timerPrivateReader = new Timer(100,taskPrivateReader);
-        timerUserUpdater = new Timer(200000,taskUserUpdater);
-        timerListUserUpdater = new Timer(3000,taskListUserUpdater);
         
         //--- SETTINGS INITIALIZE ---//
         enterSendOption = true;
@@ -252,16 +187,12 @@ public class MSNView extends javax.swing.JFrame {
      * Set the view of MSN
      * @param msn msn_controller that will set the view.
      */
-    public void setMSN(MSNController msn){
+    public void setMSN(ClientController msn){
         this.msn_ctrl = msn;
         MyUserPanel.setUser(msn_ctrl.getUser());
         MyUserPanel.repaint();
         fillUserPanel(msn_ctrl.getUserList());
         repaint();
-        timerReader.start();
-        timerPrivateReader.start();
-        timerUserUpdater.start();
-        timerListUserUpdater.start();
     }
     
     /**
@@ -394,14 +325,14 @@ public class MSNView extends javax.swing.JFrame {
     /**
      * Forces the MSN user update, independently of the state of user updater handler.
      */
-    public void updateUserForced(){
+/*    public void updateUserForced(){
         try {
             msn_ctrl.updateUser(true);
             MyUserPanel.setUser(msn_ctrl.getUser());
         } catch (UserOverflowException ex) {
             MSNView.showUserOverflowMsg(ex);
         }
-    }
+    }*/
     
     /**
      * Shows User Overflow exception message dialog.
@@ -446,7 +377,7 @@ public class MSNView extends javax.swing.JFrame {
      * @param msgs Array with messages to save. If null, it will contain the whole message panel.
      */
     public void saveMessage(String address, ArrayList<Message> msgs){
-        FileWriter fw = null;
+/*        FileWriter fw = null;
         
         if(msgs == null){
             msgs = new ArrayList();
@@ -477,7 +408,7 @@ public class MSNView extends javax.swing.JFrame {
                 if(fw != null) fw.close();
             }
             catch(IOException ex){}
-        }
+        }*/
     }
 
     // ---------- SETTINGS ACCESSORS ---------- //
@@ -765,15 +696,12 @@ public class MSNView extends javax.swing.JFrame {
      * @param evt 
      */
     private void ComboUserStateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboUserStateActionPerformed
-        try {
-            updateStateBoxColor();
-            /////////////////////////////////////////////
-            
-            msn_ctrl.setState((UserState) ComboUserState.getSelectedItem());
-            MyUserPanel.setUser(msn_ctrl.getUser());
-        } catch (UserOverflowException ex) {
-            showUserOverflowMsg(ex);
-        }
+        updateStateBoxColor();
+        /////////////////////////////////////////////
+
+        msn_ctrl.setState((UserState) ComboUserState.getSelectedItem());
+        MyUserPanel.setUser(msn_ctrl.getUser());
+
     }//GEN-LAST:event_ComboUserStateActionPerformed
     
     /**
@@ -781,7 +709,7 @@ public class MSNView extends javax.swing.JFrame {
      * @param evt 
      */
     private void BtSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtSendActionPerformed
-        if(validText) performSend();
+        //if(validText) performSend();
     }//GEN-LAST:event_BtSendActionPerformed
 
     /**
@@ -825,7 +753,7 @@ public class MSNView extends javax.swing.JFrame {
      */
     private void TextMessageKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TextMessageKeyPressed
         if(evt.getKeyCode() == KeyEvent.VK_ENTER && enterSendOption && validText){
-            performSend();
+            //performSend();
         }
     }//GEN-LAST:event_TextMessageKeyPressed
 
@@ -834,15 +762,15 @@ public class MSNView extends javax.swing.JFrame {
      * @param evt 
      */
     private void BtCopyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtCopyActionPerformed
-        ArrayList <Message> msgs = getSelectedMessages();
+    /*    ArrayList <Message> msgs = getSelectedMessages();
         clipboard = msgs.size()==0?null:new String();
         if(msgs.size() == 1 && 
-                msgs.get(0).getKind() == MessageKind.PUBLIC || msgs.get(0).getKind() == MessageKind.PRIVATE){
-            clipboard = msgs.get(0).getText();
+            msgs.get(0).getKind() == MessageKind.PUBLIC || msgs.get(0).getKind() == MessageKind.PRIVATE){
+           clipboard = msgs.get(0).getText();
         }
         else{
             for(Message m : msgs){
-                clipboard += (m.toStringXL() + "\n");
+               clipboard += (m.toStringXL() + "\n");
             }
         }
         enableCopyButtons();
@@ -850,7 +778,7 @@ public class MSNView extends javax.swing.JFrame {
         //Copy to system clipboard.
         StringSelection stringSelection = new StringSelection (clipboard);
         Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
-        clpbrd.setContents (stringSelection, null);
+        clpbrd.setContents (stringSelection, null);*/
     }//GEN-LAST:event_BtCopyActionPerformed
 
     /**

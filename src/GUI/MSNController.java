@@ -70,7 +70,7 @@ public class MSNController {
         initBuffers();
         running = true;
         view.enableMSNComponents(running);
-        msn.send(new Message(msn.getUser().getName(),"",MessageKind.BEGIN));
+        //msn.send(new Message(msn.getUser().getName(),"",MessageKind.BEGIN));
     }
     
     /**

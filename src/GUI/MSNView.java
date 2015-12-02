@@ -20,6 +20,9 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileWriter;
@@ -79,6 +82,19 @@ public class MSNView extends javax.swing.JFrame {
      */
     private boolean sound;
     
+
+    private void addToUserPanel(UserView uv) {
+        uv.addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent me) {
+                UsersPanelMouseClicked(me);
+            }
+        });
+        UsersPanel.add(uv);
+        uv.select(msn_ctrl.isSelected(uv.getUserId()));
+    }
+    
     
     
     /**
@@ -93,24 +109,9 @@ public class MSNView extends javax.swing.JFrame {
     /**
      * Action of sending a message.
      */
-/*    private void performSend(){
-        if(BtPrivate.isSelected()){
-            ArrayList <User> dest = getSelectedUsers();
-            Message msg = new Message(msn_ctrl.getUser().getName(),TextMessage.getText(),MessageKind.PRIVATE);
-            for(User u : dest){
-                msn_ctrl.send(msg,u);
-                pushMessage(new Message("","Enviaste a " + u.getName()+ ": " + TextMessage.getText(),MessageKind.JUSTTEXT));
-            }
-            
-        }
-        else{
-            Message msg = new Message(msn_ctrl.getUser().getName(),TextMessage.getText(),MessageKind.PUBLIC);
-            msn_ctrl.send(msg);
-        }
-        TextMessage.setText("");
-        TextMessage.setCaretPosition(0);
-        setValidText(false);
-    }*/
+    private void performSend(){
+        msn_ctrl.send(TextMessage.getText());
+    }
     
     /**
      * Updates the color of the user state combo box
@@ -189,10 +190,14 @@ public class MSNView extends javax.swing.JFrame {
      */
     public void setMSN(ClientController msn){
         this.msn_ctrl = msn;
-        MyUserPanel.setUser(msn_ctrl.getUser());
+        MyUserPanel.setUser(msn_ctrl.getUser(),msn_ctrl.getMyId());
         MyUserPanel.repaint();
         fillUserPanel(msn_ctrl.getUserList());
         repaint();
+    }
+    
+    public void setMSN(){
+        if(msn_ctrl != null) setMSN(msn_ctrl);
     }
     
     /**
@@ -200,6 +205,9 @@ public class MSNView extends javax.swing.JFrame {
      * @param enabled Determines enabling or disabling.
      */
     public void enableMSNComponents(boolean enabled){
+        if(enabled==true && !BtPrivate.isEnabled()){
+            setPrivate(false);
+        }
         this.BtPrivate.setEnabled(enabled);
         setValidText(enabled && !TextMessage.getText().trim().isEmpty());
         //this.ComboUserState.setEnabled(enabled);
@@ -207,8 +215,32 @@ public class MSNView extends javax.swing.JFrame {
         this.MyUserPanel.setEnabled(enabled);
         this.TextMessage.setEnabled(enabled);
         this.UsersPanel.setEnabled(enabled);
+        this.MyUserPanel.setVisible(enabled);
+        if(!enabled) UsersPanel.removeAll();
+        
+        
     }
     
+    public void setPrivate(boolean priv){
+        BtPrivate.setSelected(priv);
+        if(BtPrivate.isSelected()){
+            BtPrivate.setToolTipText("El modo privado está activado. Seleccione a los usuarios de la lista "+
+                 "con los que desea hablar");
+            BtPrivate.setBackground(new Color(0xFFC000));
+            
+        }else{
+            BtPrivate.setToolTipText("Active este botón para iniciar la mensajería privada.");
+            BtPrivate.setBackground(new Color(0xCC00CC));
+        }
+    }
+    
+    public UserState getViewState(){
+        return (UserState)ComboUserState.getSelectedItem();
+    }
+    
+    public void setViewState(UserState state){
+        ComboUserState.setSelectedItem(state);
+    }
     /**
      * Adds a new message to message panel.
      * @param msg Message to add.
@@ -236,6 +268,7 @@ public class MSNView extends javax.swing.JFrame {
             JScrollBar vertical = MessageScroll.getVerticalScrollBar();
             vertical.setValue( vertical.getMaximum() );
         }
+        //this.messageSound();
         
         //MessageScroll.getVerticalScrollBar().addAdjustmentListener((AdjustmentEvent e) -> {
         //    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
@@ -292,10 +325,13 @@ public class MSNView extends javax.swing.JFrame {
      */
     public void fillUserPanel(User[] user_list){
         UsersPanel.removeAll();
-        for(User u: user_list){
-            UserView uv = new UserView();
-            uv.setUser(u);
-            UsersPanel.add(uv);
+        for(int i = 0; i < User.getMaxUsers(); i++){
+            User u = user_list[i];
+            if(u != null){
+                UserView uv = new UserView();
+                uv.setUser(u,i);
+                addToUserPanel(uv);
+            }
         //    UsersPanel.add(Box.createRigidArea(new Dimension(5,0)));
         }
         UsersPanel.repaint();
@@ -311,7 +347,7 @@ public class MSNView extends javax.swing.JFrame {
         //UserView view;
         for(int i = 1; i < User.getMaxUsers(); i++){
             selection_now = ((UserView)UsersPanel.getComponent(i)).isSelected();
-            ((UserView)UsersPanel.getComponent(i)).setUser(user_list[i]);
+            ((UserView)UsersPanel.getComponent(i)).setUser(user_list[i],i);
             if(user_list[i].validState())
                 ((UserView)UsersPanel.getComponent(i)).select(selection_now);
         //    view = ((UserView)UsersPanel.getComponent(i));
@@ -503,6 +539,11 @@ public class MSNView extends javax.swing.JFrame {
         UsersPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         UsersPanel.setNextFocusableComponent(TextMessage);
         UsersPanel.setLayout(new javax.swing.BoxLayout(UsersPanel, javax.swing.BoxLayout.PAGE_AXIS));
+        UsersPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                UsersPanelMouseClicked(evt);
+            }
+        });
         UsersPanel.setLayout(new javax.swing.BoxLayout(UsersPanel, javax.swing.BoxLayout.PAGE_AXIS));
         UserScroll.setViewportView(UsersPanel);
 
@@ -698,9 +739,20 @@ public class MSNView extends javax.swing.JFrame {
     private void ComboUserStateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboUserStateActionPerformed
         updateStateBoxColor();
         /////////////////////////////////////////////
-
-        msn_ctrl.setState((UserState) ComboUserState.getSelectedItem());
-        MyUserPanel.setUser(msn_ctrl.getUser());
+        UserState current = MyUserPanel.getUser().getState();
+        UserState newState = (UserState) ComboUserState.getSelectedItem();
+        if(current != UserState.OFF && newState != UserState.OFF){
+            msn_ctrl.changeState((UserState) ComboUserState.getSelectedItem());
+            MyUserPanel.setUser(msn_ctrl.getUser(),msn_ctrl.getMyId());
+        }
+        else if(current != UserState.OFF){
+            msn_ctrl.stop();
+        }
+        else{
+            msn_ctrl.restart();
+            msn_ctrl.changeState(newState);
+        }
+    
 
     }//GEN-LAST:event_ComboUserStateActionPerformed
     
@@ -709,7 +761,7 @@ public class MSNView extends javax.swing.JFrame {
      * @param evt 
      */
     private void BtSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtSendActionPerformed
-        //if(validText) performSend();
+        if(validText) performSend();
     }//GEN-LAST:event_BtSendActionPerformed
 
     /**
@@ -730,10 +782,12 @@ public class MSNView extends javax.swing.JFrame {
             BtPrivate.setToolTipText("El modo privado está activado. Seleccione a los usuarios de la lista "+
                  "con los que desea hablar");
             BtPrivate.setBackground(new Color(0xFFC000));
+            
         }else{
             BtPrivate.setToolTipText("Active este botón para iniciar la mensajería privada.");
             BtPrivate.setBackground(new Color(0xCC00CC));
-        }       
+        }
+        msn_ctrl.changePrivate();
     }//GEN-LAST:event_BtPrivateActionPerformed
 
     /**
@@ -753,7 +807,7 @@ public class MSNView extends javax.swing.JFrame {
      */
     private void TextMessageKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TextMessageKeyPressed
         if(evt.getKeyCode() == KeyEvent.VK_ENTER && enterSendOption && validText){
-            //performSend();
+            performSend();
         }
     }//GEN-LAST:event_TextMessageKeyPressed
 
@@ -834,6 +888,12 @@ public class MSNView extends javax.swing.JFrame {
         enableSettingsButton(false);
         sv.showView(this);
     }//GEN-LAST:event_BtSettingsActionPerformed
+
+    private void UsersPanelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UsersPanelMouseClicked
+        if(evt.getComponent() instanceof UserView){
+            msn_ctrl.changeSelect(((UserView)evt.getComponent()).getUserId());
+        }
+    }//GEN-LAST:event_UsersPanelMouseClicked
 
     
 

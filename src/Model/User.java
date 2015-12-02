@@ -99,6 +99,12 @@ public class User {
         this.current_time = new Date();
 
     }
+    
+    public User(String name, UserState state, Date date){
+        this.name = name;
+        this.state = state;
+        this.current_time = date;
+    }
 
 
     
@@ -307,5 +313,9 @@ public class User {
     public String toString(){
         return  "\nName: " + name + "\nState: "
                     + state.toString() + "\nLast update: " + df.format(current_time);
+    }
+    
+    public String toMessage(){
+        return this.name+ServerData.US+this.state.toString()+ServerData.US+df.format(current_time)+ServerData.RS;
     }
 }

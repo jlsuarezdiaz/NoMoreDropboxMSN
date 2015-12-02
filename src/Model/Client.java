@@ -23,12 +23,14 @@ import javax.swing.JOptionPane;
  * @author Juan Luis
  */
 public class Client {
+    public static final String host = "localhost";
+    public static final int port = 8989;
+    
     public static void main(String[] args){
         String buferEnvio;
         String buferRecepcion;
         
-        String host = "localhost";
-        int port = 8989;
+       
         
         Socket socketServicio = null;
         
@@ -39,14 +41,14 @@ public class Client {
             //////////////////////////////////////////////////////			
             Scanner inputStream=new Scanner(socketServicio.getInputStream(),"UTF-8");
             OutputStreamWriter outputStream=new OutputStreamWriter(socketServicio.getOutputStream(),"UTF-8");
-            inputStream.useDelimiter(String.valueOf(ServerData.GS));
+            inputStream.useDelimiter(String.valueOf(ServerData.FS));
 
             
             buferRecepcion = inputStream.next();
             
             // Mostremos la cadena de caracteres recibidos:
             
-            String[] info = buferRecepcion.split(String.valueOf(ServerData.US));
+            String[] info = buferRecepcion.split(String.valueOf(ServerData.GS));
             System.out.println("["+info[1]+"] "+info[0]+" received.");
             if(MessageKind.valueOf(info[0])!=MessageKind.HELO){
                 System.err.println("No se obtuvo una respuesta correcta del servidor");
@@ -69,7 +71,7 @@ public class Client {
                 outputStream.flush();
                 
                 buferRecepcion = inputStream.next();
-                info = buferRecepcion.split(String.valueOf(ServerData.US));
+                info = buferRecepcion.split(String.valueOf(ServerData.GS));
                 
                 System.out.println("["+info[1]+"] "+info[0]+" received.");
                 if(MessageKind.valueOf(info[0])==MessageKind.ERR){

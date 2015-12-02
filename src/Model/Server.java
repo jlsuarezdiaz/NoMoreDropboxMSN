@@ -39,18 +39,18 @@ public class Server {
             // Mientras ... siempre!
             do {
 
-                    // Aceptamos una nueva conexión con accept()
-                    /////////////////////////////////////////////////
-                    try{
-                            socketServicio=serverSocket.accept();
-                    }
-                    catch(IOException e){
-                            System.err.println("Error: no se pudo aceptar la conexión solicitada");
-                    }
-                    //////////////////////////////////////////////////
-            
-                    ProcesadorMSN procesador = new ProcesadorMSN(socketServicio,serverData);
-                    procesador.start();
+                // Aceptamos una nueva conexión con accept()
+                /////////////////////////////////////////////////
+                try{
+                        socketServicio=serverSocket.accept();
+                }
+                catch(IOException e){
+                        System.err.println("Error: no se pudo aceptar la conexión solicitada");
+                }
+                //////////////////////////////////////////////////
+
+                ProcesadorMSN procesador = new ProcesadorMSN(socketServicio,serverData);
+                procesador.start();
             }while(true);
         } catch (IOException e) {
                     System.err.println("Error al escuchar en el puerto "+port);

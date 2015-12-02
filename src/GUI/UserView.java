@@ -27,6 +27,11 @@ public class UserView extends javax.swing.JPanel {
     private boolean isSelected;
     
     /**
+     * User id.
+     */
+    private int id;
+    
+    /**
      * Private method to set colors.
      * @param c Color to set.
      */
@@ -90,6 +95,10 @@ public class UserView extends javax.swing.JPanel {
         return userModel;
     }
     
+    public int getUserId(){
+        return id;
+    }
+    
     /**
      * @return true if and only if the user is selected.
      */
@@ -111,11 +120,14 @@ public class UserView extends javax.swing.JPanel {
      * Set the view with a user.
      * @param u User.
      */
-    public void setUser(User u){
+    public void setUser(User u, int id){
         isSelected = false;
         this.userModel = u;
+        this.id = id;
+        
         setNameFont();
         this.labelName.setText(u.getName());
+        
         this.labelState.setText(u.getState().toString());
         this.labelDate.setText((u.getDate() == null)?"":User.getDateFormat().format(u.getDate()));
         if(userModel.getState() == UserState.OFF){

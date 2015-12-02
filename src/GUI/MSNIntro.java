@@ -190,7 +190,7 @@ public class MSNIntro extends javax.swing.JDialog {
      * Reads the user name and inits the messenger.
      */
     private void performReadName(){
-        user = this.txtUserName.getName();
+        user = this.txtUserName.getText();
         this.dispose();
     }
     

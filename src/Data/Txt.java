@@ -47,6 +47,10 @@ public class Txt {
     ;
     
     /**
+     * Program's name
+     */
+    public static final String PROGRAM_NAME = "FR MSN";
+    /**
      * Author's string.
      */
     public static final String AUTHOR = "Juan Luis Suárez Díaz";
@@ -54,7 +58,7 @@ public class Txt {
     /**
      * Version's string.
      */
-    public static final String VERSION = "v2.0";
+    public static final String VERSION = "v3.0";
     
     /**
      * Copyright's string.
@@ -64,11 +68,10 @@ public class Txt {
     /**
      * Edition's string.
      */
-    public static final String EDITION = "Dropbox MSN Ultimate Java Edition";
+    public static final String EDITION = "";//"Dropbox MSN Ultimate Java Edition";
     
     /**
      * String with program info.
      */
-    public static final String PROGRAM_INFO = "¿Buscas un servicio de mensajería divertido, eficaz y sencillo?\n"+
-            "Con el nuevo Dropbox MSN, tendrás eso y mucho más.\nInvita a tus amigos, introduce un nombre, ¡y empieza a chatear!";
+    public static final String PROGRAM_INFO = "";
 }

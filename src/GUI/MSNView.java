@@ -129,7 +129,8 @@ public class MSNView extends javax.swing.JFrame {
      * Enables or disables copying, pasting and removing buttons.
      */
     private void enableCopyButtons(){
-        if(getSelectedMessages().isEmpty()){
+        /*---TMP--*/
+        /*if(getSelectedMessages().isEmpty()){
             BtCopy.setEnabled(false);
             BtRemove.setEnabled(false);
         }
@@ -138,7 +139,7 @@ public class MSNView extends javax.swing.JFrame {
             BtRemove.setEnabled(true);
         }
         BtPaste.setEnabled(clipboard != null);
-        repaint();
+        repaint();*/
     }
     
     /**
@@ -162,6 +163,12 @@ public class MSNView extends javax.swing.JFrame {
                 System.exit(0);
             }
         });
+        
+        /* --TMP */ 
+        this.BtSettings.setEnabled(false);
+        this.BtCopy.setEnabled(false);
+        this.BtPaste.setEnabled(false);
+        this.BtRemove.setEnabled(false);
                 
         
         //--- SETTINGS INITIALIZE ---//
@@ -172,6 +179,8 @@ public class MSNView extends javax.swing.JFrame {
         clipboard = null;
         
         enableCopyButtons();
+        
+        this.setTitle(Data.Txt.PROGRAM_NAME);
     }
 
     /**

@@ -46,6 +46,7 @@ public class SettingsView extends javax.swing.JDialog {
                 dispose();
             }
         });
+        this.setTitle(Data.Txt.PROGRAM_NAME+ " (Settings)");
     }
 
     /**

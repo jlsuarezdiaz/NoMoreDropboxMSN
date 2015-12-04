@@ -41,6 +41,11 @@ public class MSNIntro extends javax.swing.JDialog {
                 System.exit(0);
             }
         });
+        //--TMP--//
+        this.labelAuthor.setVisible(false);
+        
+        this.setTitle(Data.Txt.PROGRAM_NAME);
+        this.labelWelcome.setText("BIENVENIDO A "+Data.Txt.PROGRAM_NAME);
     }
 
     /**

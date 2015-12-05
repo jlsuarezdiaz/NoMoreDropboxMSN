@@ -49,7 +49,7 @@ public class Txt {
     /**
      * Program's name
      */
-    public static final String PROGRAM_NAME = "FR MSN";
+    public static final String PROGRAM_NAME = "NO MORE DROPBOX MSN";
     /**
      * Author's string.
      */
@@ -68,7 +68,7 @@ public class Txt {
     /**
      * Edition's string.
      */
-    public static final String EDITION = "";//"Dropbox MSN Ultimate Java Edition";
+    public static final String EDITION = "No More Dropbox MSN Ultimate Java Edition";
     
     /**
      * String with program info.

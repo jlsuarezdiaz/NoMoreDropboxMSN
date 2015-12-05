@@ -198,6 +198,7 @@ public class ServerData {
     public synchronized void removeUser(int id){
         String name = user_list[id].getName();
         user_list[id] = new User();
+        numUsers--;
         //Notificamos a todos los usuarios el nuevo cambio.
         sendToAll(new Message(MessageKind.RECEIVEUSR, new String[]{getUsersString()}).toMessage());
         sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{name+" se ha desconectado."}).toMessage());

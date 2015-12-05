@@ -20,7 +20,7 @@ public class Server {
         ServerData serverData = new ServerData();
         
         //Puerto de escucha
-        int port = 8989;
+        int port = 8928;
         
         //Declaraciones
 	ServerSocket serverSocket = null;

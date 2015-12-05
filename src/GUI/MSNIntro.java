@@ -41,8 +41,7 @@ public class MSNIntro extends javax.swing.JDialog {
                 System.exit(0);
             }
         });
-        //--TMP--//
-        this.labelAuthor.setVisible(false);
+        
         
         this.setTitle(Data.Txt.PROGRAM_NAME);
         this.labelWelcome.setText("BIENVENIDO A "+Data.Txt.PROGRAM_NAME);
@@ -75,9 +74,9 @@ public class MSNIntro extends javax.swing.JDialog {
         setMinimumSize(new java.awt.Dimension(350, 500));
         setResizable(false);
 
-        labelWelcome.setFont(new java.awt.Font("Calibri", 1, 24)); // NOI18N
+        labelWelcome.setFont(new java.awt.Font("Calibri", 1, 18)); // NOI18N
         labelWelcome.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        labelWelcome.setText("BIENVENIDO A DROPBOX MSN");
+        labelWelcome.setText("BIENVENIDO A NO MORE DROPBOX MSN");
 
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/msn_ultimate1.png"))); // NOI18N
@@ -131,7 +130,7 @@ public class MSNIntro extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(labelWelcome, javax.swing.GroupLayout.DEFAULT_SIZE, 315, Short.MAX_VALUE)
+                    .addComponent(labelWelcome, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(10, 10, 10)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -175,7 +174,7 @@ public class MSNIntro extends javax.swing.JDialog {
                 .addComponent(txtUserName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btStart)
-                .addContainerGap(59, Short.MAX_VALUE))
+                .addContainerGap(66, Short.MAX_VALUE))
         );
 
         pack();

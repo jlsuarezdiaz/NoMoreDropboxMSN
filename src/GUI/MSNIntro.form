@@ -38,7 +38,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="labelWelcome" pref="315" max="32767" attributes="0"/>
+                  <Component id="labelWelcome" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="10" pref="10" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -94,7 +94,7 @@
               <Component id="txtUserName" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="btStart" min="-2" max="-2" attributes="0"/>
-              <EmptySpace pref="59" max="32767" attributes="0"/>
+              <EmptySpace pref="66" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -103,10 +103,10 @@
     <Component class="javax.swing.JLabel" name="labelWelcome">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Calibri" size="24" style="1"/>
+          <Font name="Calibri" size="18" style="1"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="0"/>
-        <Property name="text" type="java.lang.String" value="BIENVENIDO A DROPBOX MSN"/>
+        <Property name="text" type="java.lang.String" value="BIENVENIDO A NO MORE DROPBOX MSN"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">

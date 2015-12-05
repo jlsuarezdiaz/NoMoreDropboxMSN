@@ -129,8 +129,7 @@ public class MSNView extends javax.swing.JFrame {
      * Enables or disables copying, pasting and removing buttons.
      */
     private void enableCopyButtons(){
-        /*---TMP--*/
-        /*if(getSelectedMessages().isEmpty()){
+        if(getSelectedMessages().isEmpty()){
             BtCopy.setEnabled(false);
             BtRemove.setEnabled(false);
         }
@@ -139,7 +138,7 @@ public class MSNView extends javax.swing.JFrame {
             BtRemove.setEnabled(true);
         }
         BtPaste.setEnabled(clipboard != null);
-        repaint();*/
+        repaint();
     }
     
     /**
@@ -164,12 +163,7 @@ public class MSNView extends javax.swing.JFrame {
             }
         });
         
-        /* --TMP */ 
-        this.BtSettings.setEnabled(false);
-        this.BtCopy.setEnabled(false);
-        this.BtPaste.setEnabled(false);
-        this.BtRemove.setEnabled(false);
-                
+               
         
         //--- SETTINGS INITIALIZE ---//
         enterSendOption = true;
@@ -825,23 +819,22 @@ public class MSNView extends javax.swing.JFrame {
      * @param evt 
      */
     private void BtCopyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtCopyActionPerformed
-    /*    ArrayList <Message> msgs = getSelectedMessages();
+        ArrayList <Message> msgs = getSelectedMessages();
         clipboard = msgs.size()==0?null:new String();
-        if(msgs.size() == 1 && 
-            msgs.get(0).getKind() == MessageKind.PUBLIC || msgs.get(0).getKind() == MessageKind.PRIVATE){
-           clipboard = msgs.get(0).getText();
-        }
-        else{
+        //if(msgs.size() == 1){
+        //   clipboard = msgs.get(0).getMessageData()[0];
+        //}
+        //else{
             for(Message m : msgs){
-               clipboard += (m.toStringXL() + "\n");
+               clipboard += "["+Message.getDateFormat().format(m.getDate())+"] "+m.getMessageData()[0]+"\n";
             }
-        }
+        //}
         enableCopyButtons();
         
         //Copy to system clipboard.
         StringSelection stringSelection = new StringSelection (clipboard);
         Clipboard clpbrd = Toolkit.getDefaultToolkit ().getSystemClipboard ();
-        clpbrd.setContents (stringSelection, null);*/
+        clpbrd.setContents (stringSelection, null);
     }//GEN-LAST:event_BtCopyActionPerformed
 
     /**

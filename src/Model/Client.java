@@ -22,7 +22,7 @@ import javax.swing.JOptionPane;
  */
 public class Client {
     public static final String host = "localhost";
-    public static final int port = 8989;
+    public static final int port = 8928;
     
     public static void main(String[] args){
         String buferEnvio;

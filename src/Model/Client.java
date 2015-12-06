@@ -6,11 +6,15 @@ package Model;
 import GUI.MSNIntro;
 import GUI.MSNView;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,8 +25,39 @@ import javax.swing.JOptionPane;
  * @author Juan Luis
  */
 public class Client {
-    public static final String host = "localhost";
-    public static final int port = 8928;
+    private static final String configName = ".configc";
+    
+    public static final String host = readHost();
+    public static final int port = readPort();
+    
+    private static final String readHost(){
+        String rHost = "localhost"; //Default host.
+        File file = new File(configName);
+        if(file.exists()){
+            try{
+                String txt = String.join("\n", Files.readAllLines(Paths.get(configName)));
+                String[] data = txt.split("\n*(HOST\\s*=\\s*|PORT\\s*=\\s*)");
+                rHost = data[1];
+            }
+            catch(Exception ex){}
+        }
+        return rHost;
+    }
+    
+    private static final int readPort(){
+        int rPort = 8928; //Default port.
+                String rHost = "localhost"; //Default host.
+        File file = new File(configName);
+        if(file.exists()){
+            try{
+                String txt = String.join("\n", Files.readAllLines(Paths.get(configName)));
+                String[] data = txt.split("\n*(HOST\\s*=\\s*|PORT\\s*=\\s*)");
+                rPort = Integer.valueOf(data[2]);
+            }
+            catch(Exception ex){}
+        }
+        return rPort;
+    }
     
     public static void main(String[] args){
         String buferEnvio;

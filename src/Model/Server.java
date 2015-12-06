@@ -46,7 +46,8 @@ public class Server {
             +"\n\tSENDASSERVER o SAS\t- Envía a todos los usuarios mensajes identificado como el servidor."
             +"\n\tNOTIFYRESTART o NRST\t- Avisa a los usuarios de un reinicio en breve del servidor."
             +"\n\tNOTIFYCLOSE o NCLS\t- Avisa a los usuarios del cierre en breve del servidor."
-            +"\n\tPORT\t. Indica el puerto por el que está escuchando el servidor.";
+            +"\n\tUSERS\t- Indica cuántos usuarios hay conectados y su estado."
+            +"\n\tPORT\t- Indica el puerto por el que está escuchando el servidor.";
     
     private static void reader(ServerData serverData){
         new Thread(new Runnable() {

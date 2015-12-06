@@ -416,7 +416,7 @@ public class MSNView extends javax.swing.JFrame {
      * @param msgs Array with messages to save. If null, it will contain the whole message panel.
      */
     public void saveMessage(String address, ArrayList<Message> msgs){
-/*        FileWriter fw = null;
+        FileWriter fw = null;
         
         if(msgs == null){
             msgs = new ArrayList();
@@ -433,7 +433,7 @@ public class MSNView extends javax.swing.JFrame {
         try{
             fw = new FileWriter(address);
             for(Message msg : msgs){
-                fw.write(msg.toStringXL() + "\n");
+                fw.write("["+Message.getDateFormat().format(msg.getDate())+"] "+msg.getMessageData()[0]+"\n");
             }
             
         }
@@ -447,7 +447,7 @@ public class MSNView extends javax.swing.JFrame {
                 if(fw != null) fw.close();
             }
             catch(IOException ex){}
-        }*/
+        }
     }
 
     // ---------- SETTINGS ACCESSORS ---------- //

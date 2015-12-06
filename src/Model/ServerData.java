@@ -33,7 +33,8 @@ public class ServerData {
     private User[] user_list = new User[MAX_USERS];
     
     private OutputStreamWriter outputStreams[] = new OutputStreamWriter[MAX_USERS];
-    int numUsers;
+    
+    private int numUsers;
     
     private boolean selectedUsers[][] = new boolean[MAX_USERS][MAX_USERS];
     
@@ -85,6 +86,14 @@ public class ServerData {
         });
         
         this.userChecker.start();
+    }
+    
+    public int getNumUsers(){
+        return numUsers;
+    }
+    
+    public User[] getUserList(){
+        return user_list;
     }
   
     private String getUsersString(){

@@ -10,6 +10,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -64,15 +65,11 @@ public class Server {
                                     System.exit(0);
                                     break;
                                 case "send":
-                                    for(int i = 1; i < args.length; i++){
-                                        serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{args[i]}).toMessage());
-                                    }
+                                    serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{cmd.split("^send\\s+")[1]}).toMessage());
                                     break;
                                 case "sendasserver":
                                 case "sas":
-                                    for(int i = 1; i < args.length; i++){
-                                        serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{"Mensaje del Servidor de No More Dropbox MSN: "+ args[i]}).toMessage());
-                                    }
+                                    serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{"Mensaje del Servidor de No More Dropbox MSN: "+cmd.split("^(sendasserver|sas)\\s+")[1]}).toMessage());
                                     break;
                                 case "notifyrestart":
                                 case "nrst":
@@ -88,6 +85,14 @@ public class Server {
                                 case "help":
                                     System.out.println(Server.serverHelp);
                                     break;
+                                case "users":
+                                    System.out.println("USUARIOS CONECTADOS: "+serverData.getNumUsers());
+                                    User[] ul = serverData.getUserList();
+                                    for(int i = 0; i < User.getMaxUsers(); i++){
+                                        if(ul[i]!= null && ul[i].validState()){
+                                            System.out.println("\tID "+i+"\tNAME = "+ul[i].getName()+ "\tSTATE = "+ul[i].getState());
+                                        }
+                                    }
                                 case "":
                                     break;
                                 default:

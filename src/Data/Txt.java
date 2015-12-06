@@ -32,24 +32,30 @@ public class Txt {
             "Versión 1.4 (6/7/2015):"+
             "\n- Añadidas las opciones de copiar, pegar y borrar los mensajes seleccionados."+
             "\n- Ahora los mensajes copiados se añaden al portapapeles del sistema."+
-            "\n- Añadido el menú de configuración.\n\n"
+            "\n- Añadido el menú de configuración.\n\n"+
+            "Versión 2.0 (9/7/2015):"+
+            "\n- Mejoras al enviar mensajes pulsando Intro."+
+            "\n- Mejoras al habilitar el menú de configuración."+
+            "\n- Añadida la opción de guardar mensajes."+
+            "\n- Añadidos al programa los menús acerca del programa.\n\n"
             ;
     
     /**
      * String with info about last version.
      */
     public static final String LAST_VERSION_INFO =
-            "Versión 2.0 (9/7/2015):"+
-            "\n- Mejoras al enviar mensajes pulsando Intro."+
-            "\n- Mejoras al habilitar el menú de configuración."+
-            "\n- Añadida la opción de guardar mensajes."+
-            "\n- Añadidos al programa los menús acerca del programa.\n\n"
+            "Versión 3.0 (6/12/2015):"+
+            "\n- Nueva estructura cliente-servidor independiente de Dropbox."+
+            "\n- El programa pasa a llamarse No More Dropbox MSN."+
+            "\n- Servidor interactivo con línea de comandos."+
+            "\n- Lectura de host y puerto modificable desde ficheros de configuración.\n\n"
     ;
     
     /**
      * Program's name
      */
     public static final String PROGRAM_NAME = "NO MORE DROPBOX MSN";
+    
     /**
      * Author's string.
      */

@@ -6,6 +6,8 @@ package Model;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -23,6 +25,8 @@ public class Server {
     
     //Puerto de escucha
     private static final int port = readPort();
+    
+    private static ServerSocket serverSocket = null;
     
     private static final int readPort(){
         int rPort = 8928; //Default port.
@@ -83,6 +87,12 @@ public class Server {
                                 case "port":
                                     System.out.println("El servidor está escuchando por el puerto "+Integer.toString(port));
                                     break;
+                                case "address":
+                                    System.out.println("Address =\t\t"+InetAddress.getLocalHost().getAddress());
+                                    System.out.println("Canonical Host name =\t"+InetAddress.getLocalHost().getCanonicalHostName());
+                                    System.out.println("Host Name =\t\t"+ InetAddress.getLocalHost().getHostName());
+                                    System.out.println("Host Address =\t\t"+InetAddress.getLocalHost().getHostAddress());
+                                    break;
                                 case "help":
                                     System.out.println(Server.serverHelp);
                                     break;
@@ -94,6 +104,19 @@ public class Server {
                                             System.out.println("\tID "+i+"\tNAME = "+ul[i].getName()+ "\tSTATE = "+ul[i].getState());
                                         }
                                     }
+                                    break;
+                                case "cmd":
+                                    Process p = Runtime.getRuntime().exec(cmd.split("^cmd")[1]);
+                                    p.waitFor(); 
+                                    BufferedReader reader=new BufferedReader(
+                                        new InputStreamReader(p.getInputStream())
+                                    ); 
+                                    String line; 
+                                    while((line = reader.readLine()) != null) 
+                                    { 
+                                        System.out.println(line);
+                                    } 
+                                    break;
                                 case "":
                                     break;
                                 default:
@@ -123,7 +146,7 @@ public class Server {
             //////////////////////////////////////////////////
             serverSocket=new ServerSocket(port);
             System.out.println("["+Message.getDateFormat().format(new Date())+"] Server started.");
-
+            Server.serverSocket = serverSocket;
             //////////////////////////////////////////////////
             //Abrimos la hebra lectora del servidor, que permite la interactividad.
             reader(serverData);

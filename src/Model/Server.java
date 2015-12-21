@@ -53,7 +53,8 @@ public class Server {
             +"\n\tUSERS\t- Indica cuántos usuarios hay conectados y su estado."
             +"\n\tPORT\t- Indica el puerto por el que está escuchando el servidor."
             +"\n\tADDRESS\t- Muestra información sobre las direcciones."
-            +"\n\tCMD\t- Ejecuta comandos del sistema.";
+            +"\n\tCMD\t- Ejecuta comandos del sistema."
+            +"\n\tDISC\t- Fuerza la desconexión del usuario con el ID indicado.";
     
     private static void reader(ServerData serverData){
         new Thread(new Runnable() {

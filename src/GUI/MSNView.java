@@ -14,7 +14,10 @@ import Model.UserState;
 import Swing.ColorComboBox;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Image;
+import java.awt.SystemTray;
 import java.awt.Toolkit;
+import java.awt.TrayIcon;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -81,6 +84,18 @@ public class MSNView extends javax.swing.JFrame {
      * Allows sound when receiving a message.
      */
     private boolean sound;
+    
+    /**
+     * Allows desktop notifications when receiving a message.
+     */
+    private boolean desktopNotifications;
+    
+    /**
+     * Tray icon;
+     */
+    private TrayIcon myTrayIcon;
+    
+
     
 
     private void addToUserPanel(UserView uv) {
@@ -170,11 +185,17 @@ public class MSNView extends javax.swing.JFrame {
         
         sound = true;
         
+        desktopNotifications = true;
+        
         clipboard = null;
         
         enableCopyButtons();
         
         this.setTitle(Data.Txt.PROGRAM_NAME);
+        
+        myTrayIcon = null;
+        initializeTrayIcon();
+
     }
 
     /**
@@ -185,6 +206,25 @@ public class MSNView extends javax.swing.JFrame {
         TextMessage.grabFocus();
         TextMessage.requestFocusInWindow();
         TextMessage.requestFocus();
+    }
+    
+    public void initializeTrayIcon(){
+        if(SystemTray.isSupported()){
+            Image img = Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Media/msn_icon.png"));
+            myTrayIcon =
+                new TrayIcon(img, "No More Dropbox MSN");
+            myTrayIcon.setImageAutoSize(true);
+            final SystemTray tray = SystemTray.getSystemTray();
+             try {
+            tray.add(myTrayIcon);
+            } catch (Exception e) {}
+        }
+    }
+    
+    public void desktopNotify(String msg){      
+        if(SystemTray.isSupported() && !isActive() && desktopNotifications){
+            myTrayIcon.displayMessage("NO MORE DROPBOX MSN", msg, TrayIcon.MessageType.INFO);
+        }
     }
     
     /**
@@ -276,6 +316,7 @@ public class MSNView extends javax.swing.JFrame {
         //MessageScroll.getVerticalScrollBar().addAdjustmentListener((AdjustmentEvent e) -> {
         //    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
         //});
+        desktopNotify(msg.getMessageData()[0]);
     }
     
     /**
@@ -478,6 +519,14 @@ public class MSNView extends javax.swing.JFrame {
     public void setSound(boolean b){
         sound = b;
     }
+    
+    public boolean getDesktopNotifications(){
+        return desktopNotifications;
+    }
+    
+    public void setDesktopNotifications(boolean b){
+        desktopNotifications = b;
+    }
         
     /**
      * This method is called from within the constructor to initialize the form.
@@ -509,7 +558,7 @@ public class MSNView extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dropbox MSN");
-        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Media/msn_ultimate1.png")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Media/msn_icon.png")));
         setMaximumSize(new java.awt.Dimension(945, 591));
         setMinimumSize(new java.awt.Dimension(945, 591));
         setResizable(false);
@@ -751,7 +800,7 @@ public class MSNView extends javax.swing.JFrame {
         else if(current != UserState.OFF){
             msn_ctrl.stop();
         }
-        else{
+        else if(newState != UserState.OFF){
             msn_ctrl.restart();
             msn_ctrl.changeState(newState);
         }

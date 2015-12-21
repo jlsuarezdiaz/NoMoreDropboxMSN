@@ -51,7 +51,9 @@ public class Server {
             +"\n\tNOTIFYRESTART o NRST\t- Avisa a los usuarios de un reinicio en breve del servidor."
             +"\n\tNOTIFYCLOSE o NCLS\t- Avisa a los usuarios del cierre en breve del servidor."
             +"\n\tUSERS\t- Indica cuántos usuarios hay conectados y su estado."
-            +"\n\tPORT\t- Indica el puerto por el que está escuchando el servidor.";
+            +"\n\tPORT\t- Indica el puerto por el que está escuchando el servidor."
+            +"\n\tADDRESS\t- Muestra información sobre las direcciones."
+            +"\n\tCMD\t- Ejecuta comandos del sistema.";
     
     private static void reader(ServerData serverData){
         new Thread(new Runnable() {
@@ -117,6 +119,17 @@ public class Server {
                                         System.out.println(line);
                                     } 
                                     break;
+                                case "disc":
+                                    try{
+                                    if(args.length > 1){
+                                        serverData.sendTo(Integer.valueOf(args[1]),new Message(MessageKind.DISC, null).toMessage());
+                                    }
+                                    else throw new IllegalArgumentException("Illegal arguments.");
+                                    }
+                                    catch(Exception ex){
+                                        System.out.println("Uso: DISC id");
+                                    }
+                                    break;
                                 case "":
                                     break;
                                 default:
@@ -167,7 +180,7 @@ public class Server {
                 procesador.start();
             }while(true);
         } catch (IOException e) {
-                    System.err.println("Error al escuchar en el puerto "+port);
+                    System.err.println("Error al escuchar en el puerto "+port+"\n"+e.getMessage());
         }
     }
 }

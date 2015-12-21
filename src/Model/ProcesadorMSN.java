@@ -32,6 +32,11 @@ class ProcesadorMSN extends Thread{
     // stream de escritura (por aquí se envía los datos al cliente)
     private OutputStreamWriter outputStream;
     
+    /**
+     * Indicates whether this processor thread is still alive.
+     */
+    private boolean running;
+    
     
     // Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
     public ProcesadorMSN(Socket socketServicio,ServerData s) {
@@ -47,6 +52,7 @@ class ProcesadorMSN extends Thread{
         catch(Exception ex){
             System.err.println("Error al crear el flujo E/S: "+ex.getMessage());
         }
+        this.running=true;
     }
 
     private void procesa() {
@@ -65,15 +71,17 @@ class ProcesadorMSN extends Thread{
         do{
             try {
                 //Leemos un nuevo mensaje.
-                while(!inputStream.hasNext()){}
+                while(!inputStream.hasNext() && running){}
+                if(!running) break;
+                
                 datosEnviar="";
                 datosRecibidos=inputStream.next();
                 String[] info = datosRecibidos.split(String.valueOf(ServerData.GS));
-
+                
                 switch(MessageKind.valueOf(info[0])){
                     case LOGIN: //Fecha,Nombre
                         System.out.println("["+info[1]+"] LOGIN received.");
-                        int id = serverData.addUser(info[2],outputStream);    //Necesita Mutex
+                        int id = serverData.addUser(info[2],outputStream,this);    //Necesita Mutex
                         if(id == -1){
                             datosEnviar = new Message(MessageKind.ERR,new String[]{"Hay demasiados usuarios conectados. Inténtelo más tarde."}).toMessage();
                         }
@@ -105,7 +113,8 @@ class ProcesadorMSN extends Thread{
                     case LOGOUT:   //Fecha,ID
                         System.out.println("["+info[1]+"] LOGOUT received.");
                         serverData.removeUser(Integer.valueOf(info[2]));
-                        datosEnviar=new Message(MessageKind.BYE,null).toMessage();
+                        
+                        kill();
                         break;
 
                     case IMALIVE: //Fecha, ID
@@ -123,15 +132,25 @@ class ProcesadorMSN extends Thread{
                     outputStream.flush();
                 }
 
-            } catch (IOException ex) {
-                System.err.println("Error al obtener los flujos de entrada/salida.");      
+            } catch (Exception ex) {
+                //System.err.println("Error al obtener los flujos de entrada/salida.");      
+                System.err.println("Error en el procesador:\n"+ ex.getMessage());
             }
         }while(true);
+        System.out.println("["+Message.getDateFormat().format(new Date())+"] Connection ended.");
 
     }
     
     //Añadimos el método run() de la clase Thread, con la función de procesamiento.
     public void run(){
         procesa();
+    }
+    
+    public void kill(){
+        try{
+            socketServicio.close();
+        }
+        catch(Exception ex){}
+        this.running=false;
     }
 }

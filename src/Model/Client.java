@@ -70,7 +70,7 @@ public class Client {
         try{
             // Creamos un socket que se conecte a "host" y "port":
             //////////////////////////////////////////////////////
-            socketServicio=new Socket(host,port);
+                socketServicio=new Socket(host,port);
             //////////////////////////////////////////////////////			
             Scanner inputStream=new Scanner(socketServicio.getInputStream(),"UTF-8");
             OutputStreamWriter outputStream=new OutputStreamWriter(socketServicio.getOutputStream(),"UTF-8");
@@ -122,7 +122,8 @@ public class Client {
             //////////////////////////////////////////////////////
             
         } catch (IOException ex) {
-            System.err.println("Error: no se pudo establecer una conexión con el servidor.");
+            JOptionPane.showMessageDialog(null, "Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage() , "Error de conexión",JOptionPane.ERROR_MESSAGE);
+            System.err.println("Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage());
         }
     }
 }

@@ -34,6 +34,8 @@ public class ServerData {
     
     private OutputStreamWriter outputStreams[] = new OutputStreamWriter[MAX_USERS];
     
+    private ProcesadorMSN processors[] = new ProcesadorMSN[MAX_USERS];
+    
     private int numUsers;
     
     private boolean selectedUsers[][] = new boolean[MAX_USERS][MAX_USERS];
@@ -162,7 +164,7 @@ public class ServerData {
     }
 
         
-    public synchronized int addUser(String name, OutputStreamWriter o){
+    public synchronized int addUser(String name, OutputStreamWriter o,ProcesadorMSN p){
         if(numUsers==getMAX_USERS()){
             return -1;
         }
@@ -172,6 +174,7 @@ public class ServerData {
                     user_list[i] = new User(name);
                     privateMode[i] = false;
                     outputStreams[i]= o;
+                    processors[i] = p;
                     for(int j = 0; j < getMAX_USERS(); j++){
                         selectedUsers[i][j] = false;
                     }
@@ -211,7 +214,9 @@ public class ServerData {
         //Notificamos a todos los usuarios el nuevo cambio.
         sendToAll(new Message(MessageKind.RECEIVEUSR, new String[]{getUsersString()}).toMessage());
         sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{name+" se ha desconectado."}).toMessage());
+        sendTo(id,new Message(MessageKind.BYE,null).toMessage());
         outputStreams[id] = null;
+        processors[id] = null;
     }
     
     public synchronized void updateUser(int id){
@@ -228,9 +233,13 @@ public class ServerData {
             if(u.getDate() != null && (getTimeDifference(d,u.getDate()) > MAX_INACTIVE_PERIOD 
                     || u.getState() == UserState.OFF)){
                 //Si un usuario no ha dado señales de vida en cierto tiempo lo eliminamos.
+                sendTo(i, new Message(MessageKind.DISC, null).toMessage());
                 name = user_list[i].getName();
                 user_list[i] = new User();
                 outputStreams[i] = null;
+                processors[i].kill();
+                processors[i] = null;
+                
                 sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{name+" se ha desconectado."}).toMessage());
                 sendToAll(new Message(MessageKind.RECEIVEUSR,new String[]{getUsersString()}).toMessage());
                 System.out.println("- USER "+ Integer.toString(i) +" KILLED.");

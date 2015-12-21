@@ -146,7 +146,7 @@ public class ClientController {
                         case CONFIRMSTATE:
                             UserState state = UserState.valueOf(info[2]);
                             if(state != view.getViewState()){
-                                
+                                view.setViewState(state);
                             }
                             break;
                         case OK:
@@ -156,6 +156,9 @@ public class ClientController {
                             break;
                         case BYE:
                             setRunning(false);
+                            break;
+                        case DISC:
+                            disconnect();
                             break;
                         default:
                             System.err.println("Respuesta inadecuada. Mensaje ignorado.");
@@ -177,6 +180,7 @@ public class ClientController {
         }
         catch(Exception ex){
             System.out.println("Error al comunicarse con el servidor: "+ex.getMessage());
+            disconnect();
         }
     }
     public void send(String message){
@@ -226,6 +230,7 @@ public class ClientController {
     public void sendAliveMessage(){
         String buferEnvio = new Message(MessageKind.IMALIVE,new String[]{Integer.toString(myId)}).toMessage();
         sendToServer(buferEnvio);
+        this.myUser.update();
     }
     
     public void restart(){
@@ -269,6 +274,17 @@ public class ClientController {
         }
         catch(Exception ex){
             System.err.println("Error al restablecer la conexión: "+ex.getMessage());
+            disconnect();
+        }
+    }
+    
+    public void disconnect(){
+        running = false;
+        if(myUser.getState() != UserState.OFF){
+            this.myUser.changeState(UserState.OFF);
+            this.view.setViewState(UserState.OFF);
+            stop();
+            JOptionPane.showMessageDialog(this.view,"Te has desconectado.","Desconexión",JOptionPane.WARNING_MESSAGE);
         }
     }
     

@@ -7,14 +7,18 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import static java.lang.Thread.sleep;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -96,6 +100,16 @@ public class Server {
                                     System.out.println("Host Name =\t\t"+ InetAddress.getLocalHost().getHostName());
                                     System.out.println("Host Address =\t\t"+InetAddress.getLocalHost().getHostAddress());
                                     break;
+                                case "whatsmyip":
+                                case "wmip":
+                                    //Solución provisional
+                                    URL whatismyip = new URL("http://checkip.amazonaws.com");
+                                    BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                    whatismyip.openStream()));
+
+                                    String ip = in.readLine(); //you get the IP as a String
+                                    System.out.println(ip);
+                                    break;
                                 case "help":
                                     System.out.println(Server.serverHelp);
                                     break;
@@ -131,6 +145,39 @@ public class Server {
                                         System.out.println("Uso: DISC id");
                                     }
                                     break;
+                                case "versions":
+                                    System.out.println("\nVERSIONES ANTERIORES\n");
+                                    System.out.println(Data.Txt.OLD_VERSIONS_INFO);
+                                    System.out.println("\nVERSIÓN ACTUAL\n");
+                                    System.out.println(Data.Txt.LAST_VERSION_INFO);
+                                    break;
+                                    
+                                case "client":
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Client.main(null);
+                                        }
+                                    }).start();
+                                    
+                                    System.out.println("Un nuevo cliente va a ser ejecutado.");
+                                    System.out.println("¡ATENCIÓN! El cliente y el servidor pasan a formar parte "+
+                                        "del mismo programa. El cierre de alguno cerrará ambos simultáneamente.");
+                                    break;
+                                case "kill":
+                                    try{
+                                    if(args.length > 2){
+                                        serverData.sendTo(Integer.valueOf(args[1]),new Message(MessageKind.KILL, new String[]{cmd.split("^kill\\s+[0-9]+")[1]}).toMessage());
+                                    }
+                                    else if(args.length > 1){
+                                        serverData.sendTo(Integer.valueOf(args[1]),new Message(MessageKind.KILL, null).toMessage());                                       
+                                    }
+                                    else throw new IllegalArgumentException("Illegal arguments.");
+                                    }
+                                    catch(Exception ex){
+                                        System.out.println("Uso: KILL id <mensaje opcional>");
+                                    }
+                                    break;
                                 case "":
                                     break;
                                 default:
@@ -147,9 +194,17 @@ public class Server {
 
     /////////////////////////////////////////////////////////////////////////////
     public static void main(String args[]){
-        ServerData serverData = new ServerData();
+        System.out.println(Data.Txt.EDITION + " Server");
+        System.out.println("Un programa de " + Data.Txt.AUTHOR);
+        System.out.println(Data.Txt.VERSION + "\t\t" + Data.Txt.COPYRIGHT);
+        System.out.println("\n");
         
+        try {
+            sleep(3000);
+        } catch (InterruptedException ex) {}
         
+        //Inicialización de los datos del servidor.
+        ServerData serverData = new ServerData();   
         
         //Declaraciones
 	ServerSocket serverSocket = null;

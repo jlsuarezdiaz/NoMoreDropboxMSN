@@ -160,6 +160,12 @@ public class ClientController {
                         case DISC:
                             disconnect();
                             break;
+                        case KILL:
+                            if(info.length > 2){
+                                JOptionPane.showMessageDialog(view, info[2],"ERROR FATAL",JOptionPane.ERROR_MESSAGE);
+                            }
+                            System.exit(0);
+                            break;
                         default:
                             System.err.println("Respuesta inadecuada. Mensaje ignorado.");
                             break;

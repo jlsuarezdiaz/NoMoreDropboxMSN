@@ -239,7 +239,7 @@ public class ServerData {
                 outputStreams[i] = null;
                 processors[i].kill();
                 processors[i] = null;
-                
+                numUsers--;
                 sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{name+" se ha desconectado."}).toMessage());
                 sendToAll(new Message(MessageKind.RECEIVEUSR,new String[]{getUsersString()}).toMessage());
                 System.out.println("- USER "+ Integer.toString(i) +" KILLED.");

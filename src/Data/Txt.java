@@ -67,9 +67,15 @@ public class Txt {
     public static final String AUTHOR = "Juan Luis Suárez Díaz";
     
     /**
+     * Version's data and compatibilities.
+     */
+    public static final double VERSION_CODE = 3.2;
+    public static final double LAST_COMPATIBLE = 3.0;
+    
+    /**
      * Version's string.
      */
-    public static final String VERSION = "v3.1";
+    public static final String VERSION = "v"+Double.toString(VERSION_CODE);
     
     /**
      * Copyright's string.

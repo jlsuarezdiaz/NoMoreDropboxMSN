@@ -28,7 +28,7 @@ public class FileSend {
             
             do{
                 rec = input.read(read,totalRec,size-totalRec);
-                totalRec += rec;
+                if(rec != -1) totalRec += rec;
                 System.out.println(totalRec + " B recibidos.");
                 if(view != null) view.updateView(totalRec, size);
             }while(totalRec < size);

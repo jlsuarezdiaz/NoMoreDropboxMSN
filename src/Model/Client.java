@@ -3,6 +3,9 @@
  */
 package Model;
 
+import static FileUtils.FileSend.receiveFile;
+import GUI.LoadableView;
+import GUI.LoadingView;
 import GUI.MSNIntro;
 import GUI.MSNView;
 import java.io.BufferedReader;
@@ -207,10 +210,13 @@ public class Client {
                 case FILE:  //FILE, fecha, nombre, size
                 
                     FileOutputStream fileOutputStream = null;
-                 
-                    byte[] data = receiveFile(s,Integer.valueOf(info[3]));
+                    
+                    LoadableView v = new LoadingView(null, false);
+                    v.setView("./NoMoreDropboxMSN.jar", 0, 0, "B", "Descargando archivo:");
+                    byte[] data = receiveFile(s,Integer.valueOf(info[3]),v);
+                    
                     try { 
-                       fileOutputStream = new FileOutputStream("./NEWNoMoreDropboxMSN.jar"); 
+                       fileOutputStream = new FileOutputStream("./NoMoreDropboxMSN.jar"); 
                        fileOutputStream.write(data);
                        ret= true;
                     }
@@ -232,23 +238,5 @@ public class Client {
         return ret;
     }
     
-    public static byte[] receiveFile(Socket s, int size){
-        try{
-            byte[] read = new byte[size];
-            int rec = 0;
-            int totalRec = 0;
-            //BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            InputStream input = s.getInputStream();
-            do{
-                rec = input.read(read,totalRec,size-totalRec);
-                totalRec += rec;
-                System.out.println(totalRec + " B recibidos.");
-            }while(totalRec < size);
-            return read;
-        }
-        catch(Exception ex){
-            System.out.println("Error: "+ex.getMessage());
-            return null;
-        }
-    }
+
 }

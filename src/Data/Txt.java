@@ -55,7 +55,7 @@ public class Txt {
      */
     public static final String LAST_VERSION_INFO =
             "Versión 3.2 (2/2/2016):"+
-            "\n- Ligeras mejoras en la interfaz envío de mensajes."+
+            "\n- Ligeras mejoras en la interfaz de envío de mensajes."+
             "\n- Añadido el software para transferencia de archivos."+
             "\n- Añadidos mecanismos para la actualización automática del programa."
     ;

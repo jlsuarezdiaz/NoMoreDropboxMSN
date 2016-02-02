@@ -6,8 +6,10 @@ package Model;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.Timer;
@@ -245,6 +247,52 @@ public class ServerData {
                 System.out.println("- USER "+ Integer.toString(i) +" KILLED.");
             }
         }
+    }
+    
+    /**
+     * 
+     * @param id Cliente id. CAN be -1 to send to all the file and -2 to send to selected.
+     * @param name
+     * @param data 
+     */
+    public synchronized void sendFile(Socket s, String name, byte[] data){
+        boolean all = false, selected = false;
+        String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length)}).toMessage();
+        OutputStream os = null;
+        OutputStreamWriter o = null;
+        if(all){
+            
+        }
+        else if(selected){
+            
+        }
+        else{
+            try{
+                os = s.getOutputStream();
+                o = new OutputStreamWriter(os,"UTF-8");
+                
+                System.out.println("Se enviarán "+data.length+" B a [USER]");
+                o.write(msgcab);
+                o.flush();
+                os.write(data, 0, data.length);
+                //o.write(new String(data,StandardCharsets.UTF_8));
+                //outputStreams[id].write("\n\nENDFILE\n\n");
+                o.flush();
+                System.out.println(data.length + "B enviados a [USER]");
+                
+            }
+            catch(Exception ex){
+                System.err.println("Error: "+ex.getMessage());
+            }
+            finally{
+                try{
+                if(os != null) o.close();
+                if(o != null) o.close();
+                }catch(Exception ex){}
+            }
+            
+        }
+        
     }
     
 }

@@ -4,17 +4,21 @@
 package Model;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 /**
  *
@@ -58,6 +62,7 @@ class ProcesadorMSN extends Thread{
     private void procesa() {
         String datosRecibidos;
         String datosEnviar = "";
+        int remoteId = -1;
         
         //Nueva conexión. Enviamos el mensaje de saludo.
         System.out.println("["+Message.getDateFormat().format(new Date())+"] New connection.");
@@ -85,6 +90,7 @@ class ProcesadorMSN extends Thread{
                         if(id == -1){
                             datosEnviar = new Message(MessageKind.ERR,new String[]{"Hay demasiados usuarios conectados. Inténtelo más tarde."}).toMessage();
                         }
+                        remoteId=id;
                         break;
                     case SEND:  //Fecha,ID, mensaje
                         System.out.println("["+info[1]+"] SEND received.");
@@ -120,7 +126,45 @@ class ProcesadorMSN extends Thread{
                     case IMALIVE: //Fecha, ID
                         System.out.println("["+info[1]+"] IMALIVE received.");
                         serverData.updateUser(Integer.valueOf(info[2]));
-                        break;                    
+                        break; 
+                        
+                    case VERSION: //Fecha, Version
+                        System.out.println("["+info[1]+"] VERSION received.");
+                        double clientVersion = Double.valueOf(info[2]);
+                        if(clientVersion < Data.Txt.LAST_COMPATIBLE){
+                            //UPDATE, Info, OptYes, OptNo, canContinue
+                            datosEnviar=new Message(MessageKind.UPDATE,
+                                new String[]{"Necesita actualizar NoMoreDropboxMSN a su versión más reciente para poder seguir utilizándolo.",
+                                "Actualizar","Salir",Boolean.toString(false)}
+                            ).toMessage();
+                        }
+                        else if(clientVersion < Data.Txt.VERSION_CODE){
+                            //UPDATE, Info, OptYes, OptNo, canContinue
+                            datosEnviar=new Message(MessageKind.UPDATE,
+                                new String[]{"Hay una versión más reciente disponible de NoMoreDropboxMSN. ¿Desea actualizar?",
+                                "Actualizar","No actualizar",Boolean.toString(true)}
+                            ).toMessage();
+                        }
+                        else{
+                            datosEnviar=new Message(MessageKind.OK,null).toMessage();
+                        }
+                        break;
+                    case UPDATE:
+                        System.out.println("["+info[1]+"] UPDATE received.");
+                        if(!Server.isThereJarFile()){
+                            datosEnviar=new Message(MessageKind.ERR,
+                                new String[]{"No se puede descargar la actualización."}).toMessage();
+                        }
+                        else{
+                            File f = new File("./NoMoreDropboxMSN.jar");
+                            byte[] data = Files.readAllBytes(f.toPath());
+                            /*String dataStr = new String(data,StandardCharsets.UTF_8);
+                            //FILE, Extensión, data
+                            datosEnviar=new Message(MessageKind.FILE,new String[]{"jar",dataStr}).toMessage();
+                            System.out.println(dataStr.length() + " bloques enviados.");*/
+                            serverData.sendFile(socketServicio, f.getName(), data);
+                        }
+                        break;
                     default:
                         System.out.println("["+info[1]+"] Error: Wrong command received.");
                         datosEnviar=new Message(MessageKind.ERR,new String[]{"El código de mensaje es incorrecto."}).toMessage();
@@ -152,5 +196,9 @@ class ProcesadorMSN extends Thread{
         }
         catch(Exception ex){}
         this.running=false;
+    }
+    
+    public Socket getSocket(){
+        return socketServicio;
     }
 }

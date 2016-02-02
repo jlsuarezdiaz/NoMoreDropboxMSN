@@ -7,12 +7,15 @@ import GUI.MSNIntro;
 import GUI.MSNView;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Scanner;
@@ -87,6 +90,8 @@ public class Client {
                 System.err.println("No se obtuvo una respuesta correcta del servidor");
                 System.exit(-1);
             }
+            //Preguntamos al servidor por actualizaciones:
+            lookForUpdates(inputStream,outputStream,socketServicio);
             
             //Si el servidor nos da la bienvenida, cargamos la ventana del LOGIN:
             MSNView msn_view = new MSNView();
@@ -124,6 +129,126 @@ public class Client {
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(null, "Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage() , "Error de conexión",JOptionPane.ERROR_MESSAGE);
             System.err.println("Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage());
+        }
+    }
+    
+    
+    
+    public static void lookForUpdates(Scanner input, OutputStreamWriter output,Socket s){
+        try{
+            String sendBuffer, getBuffer;
+            sendBuffer = new Message(MessageKind.VERSION, new String[]{Double.toString(Data.Txt.VERSION_CODE)}).toMessage();
+            output.write(sendBuffer);
+            output.flush();
+            
+            getBuffer = input.next();
+            String[] info = getBuffer.split(String.valueOf(ServerData.GS));
+            System.out.println("["+info[1]+"] "+info[0]+" received.");
+            
+            int answer;
+            boolean updated = false;
+            
+            switch(MessageKind.valueOf(info[0])){
+                
+                case OK:
+                    break;
+                case UPDATE:
+                    
+                    answer = JOptionPane.showOptionDialog(null,info[2], "ACTUALIZAR",
+                            JOptionPane.DEFAULT_OPTION, Boolean.valueOf(info[5])?JOptionPane.QUESTION_MESSAGE:JOptionPane.WARNING_MESSAGE,
+                            null, new String[]{info[3],info[4]}, info[3]);
+                    if(answer==0){
+                        updated = getUpdate(input,output,s);
+                    }
+                    if(!updated && Boolean.valueOf(info[5])==false){
+                        JOptionPane.showMessageDialog(null, "Necesitas actualizar el programa para poder continuar.",
+                                "Versión Incompatible", JOptionPane.ERROR_MESSAGE);
+                        sendBuffer = new Message(MessageKind.BYE, null).toMessage();
+                        output.write(sendBuffer);
+                        output.flush();
+                        System.exit(0);
+                    }
+                    if(updated){
+                        JOptionPane.showMessageDialog(null,"El programa se actualizó correctamente. Ejecute la nueva versión.", 
+                            "Actualización correcta",JOptionPane.INFORMATION_MESSAGE);
+                        sendBuffer = new Message(MessageKind.BYE, null).toMessage();
+                        output.write(sendBuffer);
+                        output.flush();
+                        System.exit(0);
+                    }
+                    break;
+            }
+            
+        }
+        catch(Exception ex){
+            System.err.println("Error: "+ex.getMessage());
+        }
+    }
+    
+    public static boolean getUpdate(Scanner input,OutputStreamWriter output,Socket s){
+        boolean ret=false;
+        try{
+            String sendBuffer, getBuffer="";
+            sendBuffer = new Message(MessageKind.UPDATE, null).toMessage();
+            output.write(sendBuffer);
+            output.flush();
+
+            //Recepción y computación del archivo.
+            getBuffer = input.next();
+            
+            String[] info = getBuffer.split(""+ServerData.GS);
+            System.out.println("["+info[1]+"] "+info[0]+" received.");
+            
+            switch(MessageKind.valueOf(info[0])){
+                case ERR:
+                    JOptionPane.showMessageDialog(null, info.length>2?info[2]:null,
+                            "ERROR", JOptionPane.ERROR_MESSAGE);
+                    break;
+                case FILE:  //FILE, fecha, nombre, size
+                
+                    FileOutputStream fileOutputStream = null;
+                 
+                    byte[] data = receiveFile(s,Integer.valueOf(info[3]));
+                    try { 
+                       fileOutputStream = new FileOutputStream("./NEWNoMoreDropboxMSN.jar"); 
+                       fileOutputStream.write(data);
+                       ret= true;
+                    }
+                    catch(Exception ex){
+                        System.err.println("Error: " + ex.getMessage());
+                        ret = false;
+                    }
+                    finally {
+                       if(fileOutputStream != null) fileOutputStream.close();
+                    }
+                    
+                    break;
+            }
+        }
+        catch(Exception ex){
+            System.err.println("Error: " + ex.getMessage());
+            ret=false;
+        }
+        return ret;
+    }
+    
+    public static byte[] receiveFile(Socket s, int size){
+        try{
+            byte[] read = new byte[size];
+            int rec = 0;
+            int totalRec = 0;
+            //BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            InputStream input = s.getInputStream();
+            do{
+                rec = input.read(read,totalRec,size-totalRec);
+                totalRec += rec;
+                System.out.println(totalRec + " B recibidos.");
+            }while(totalRec < size);
+            return read;
+        }
+        catch(Exception ex){
+            System.out.println("Error: "+ex.getMessage());
+            return null;
         }
     }
 }

@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -19,6 +20,7 @@ import java.util.Date;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.jar.*;
 
 /**
  *
@@ -64,7 +66,7 @@ public class Server {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Scanner input = new Scanner(System.in,"UTF-8");
+                Scanner input = new Scanner(System.in,"UTF-8"); 
                 input.useDelimiter("\n");
                 while(true){
                     try{
@@ -192,6 +194,11 @@ public class Server {
         }).start();
     }
 
+    public static boolean isThereJarFile(){
+        File f = new File("./NoMoreDropboxMSN.jar");
+        return f.exists();
+    }
+    
     /////////////////////////////////////////////////////////////////////////////
     public static void main(String args[]){
         System.out.println(Data.Txt.EDITION + " Server");
@@ -202,6 +209,11 @@ public class Server {
         try {
             sleep(3000);
         } catch (InterruptedException ex) {}
+        
+        if(!isThereJarFile()){
+            System.err.println("El archivo .jar de este programa  no está disponible");
+            System.err.println("El servidor no podrá enviar actualizaciones de software a los clientes.");
+        }
         
         //Inicialización de los datos del servidor.
         ServerData serverData = new ServerData();   

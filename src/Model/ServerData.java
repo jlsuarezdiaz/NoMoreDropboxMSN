@@ -278,7 +278,7 @@ public class ServerData {
                 //o.write(new String(data,StandardCharsets.UTF_8));
                 //outputStreams[id].write("\n\nENDFILE\n\n");
                 o.flush();
-                System.out.println(data.length + "B enviados a [USER]");
+                System.out.println(data.length + " B enviados a [USER]");
                 
             }
             catch(Exception ex){

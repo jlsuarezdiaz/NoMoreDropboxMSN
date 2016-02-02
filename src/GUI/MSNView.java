@@ -814,6 +814,7 @@ public class MSNView extends javax.swing.JFrame {
      */
     private void BtSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtSendActionPerformed
         if(validText) performSend();
+        TextMessage.setText("");
     }//GEN-LAST:event_BtSendActionPerformed
 
     /**

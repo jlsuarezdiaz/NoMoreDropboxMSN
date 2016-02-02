@@ -42,18 +42,22 @@ public class Txt {
             "\n- Nueva estructura cliente-servidor independiente de Dropbox."+
             "\n- El programa pasa a llamarse No More Dropbox MSN."+
             "\n- Servidor interactivo con línea de comandos."+
-            "\n- Lectura de host y puerto modificable desde ficheros de configuración.\n\n"
+            "\n- Lectura de host y puerto modificable desde ficheros de configuración.\n\n"+
+            "Versión 3.1 (22/12/2015):"+
+            "\n- Añadidas notificaciones de escritorio."+
+            "\n- Añadida configuración para las notificaciones de escritorio."+
+            "\n- Solucionados algunos incidentes de desconexión."+
+            "\n- Nuevos comandos en el servidor.\n\n"
             ;
     
     /**
      * String with info about last version.
      */
     public static final String LAST_VERSION_INFO =
-            "Versión 3.1 (22/12/2015):"+
-            "\n- Añadidas notificaciones de escritorio."+
-            "\n- Añadida configuración para las notificaciones de escritorio."+
-            "\n- Solucionados algunos incidentes de desconexión."+
-            "\n- Nuevos comandos en el servidor.\n\n"
+            "Versión 3.2 (2/2/2016):"+
+            "\n- Ligeras mejoras en la interfaz envío de mensajes."+
+            "\n- Añadido el software para transferencia de archivos."+
+            "\n- Añadidos mecanismos para la actualización automática del programa."
     ;
     
     /**

@@ -3,10 +3,14 @@
  */
 package Model;
 
+import GUI.FileView;
 import GUI.MSNView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Scanner;
@@ -19,7 +23,7 @@ import javax.swing.Timer;
  *
  * @author Juan Luis
  */
-public class ClientController {
+public class ClientController implements Communicator{
     /**
      * View associated to controller.
      */
@@ -51,6 +55,8 @@ public class ClientController {
     private synchronized void setRunning(boolean b){
         this.running=b;
     }
+     /* The reference for this instance of this object */
+    private ClientController clientControllerInstance;
 
     ClientController(Integer id, String userName, MSNView msn_view, Socket userSocket, Scanner inputStream, OutputStreamWriter outputStream) {
         this.view = msn_view;
@@ -75,6 +81,7 @@ public class ClientController {
         }
         this.updater.start();
 
+        this.clientControllerInstance = this;
     }
     
 
@@ -166,6 +173,16 @@ public class ClientController {
                             }
                             System.exit(0);
                             break;
+                        case FILE: //FILE, date, name, length.
+                            String name = info[2];
+                            int length = Integer.valueOf(info[3]);
+                            FileView fv = new FileView();
+                            fv.setView(name,0 , length, "B", "Descargando");
+                            view.pushFile(fv);
+                            view.messageSound();
+                            File f = FileUtils.FileSend.receiveFileProtocol(clientControllerInstance, name, length, fv);
+                            fv.setFile(f);
+                            break;
                         default:
                             System.err.println("Respuesta inadecuada. Mensaje ignorado.");
                             break;
@@ -179,7 +196,7 @@ public class ClientController {
         
     }
     
-    private void sendToServer(String buferEnvio){
+    private synchronized void sendToServer(String buferEnvio){
         try{
             outputStream.write(buferEnvio);
             outputStream.flush();
@@ -192,6 +209,17 @@ public class ClientController {
     public void send(String message){
         String buferEnvio = new Message(MessageKind.SEND, new String[]{Integer.toString(myId),message}).toMessage();
         sendToServer(buferEnvio);
+    }
+    
+    public synchronized void sendFile(File f){
+        try{
+            FileUtils.FileSend.sendFileProtocol(f,clientControllerInstance);
+        }
+        catch(Exception ex){
+            System.err.println("Error: "+ex.getMessage());
+            JOptionPane.showMessageDialog(view,"Error al enviar el archivo: "+
+                    ex.getMessage() , "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void changePrivate(){
@@ -294,5 +322,24 @@ public class ClientController {
         }
     }
     
+    // -- I/OPUT ACCESS -- //
+    public InputStream getInputStream() throws IOException{
+        return mySocket.getInputStream();
+    }
     
+    public OutputStream getOutputStream() throws IOException{
+        return mySocket.getOutputStream();
+    }
+    
+    public OutputStreamWriter getOutputStreamWriter(){
+        return outputStream;
+    }
+    
+    public Scanner getInputScanner(){
+        return inputStream;
+    }
+    
+    public Socket getSocket(){
+        return mySocket;
+    }
 }

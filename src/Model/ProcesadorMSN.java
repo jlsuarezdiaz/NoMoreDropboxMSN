@@ -6,7 +6,9 @@ package Model;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -19,12 +21,11 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  *
  * @author Juan Luis
  */
-class ProcesadorMSN extends Thread{
+class ProcesadorMSN extends Thread implements Communicator{
     //Referencia al servidor
     private ServerData serverData;
     
@@ -162,11 +163,20 @@ class ProcesadorMSN extends Thread{
                             //FILE, Extensión, data
                             datosEnviar=new Message(MessageKind.FILE,new String[]{"jar",dataStr}).toMessage();
                             System.out.println(dataStr.length() + " bloques enviados.");*/
-                            serverData.sendFile(socketServicio, f.getName(), data);
+                            serverData.sendFile(this, f.getName(), data);
                         }
                         break;
+                    case FILE: //FILE, date, name, length.
+                        System.out.println("["+info[1]+"] FILE received.");
+                        String fileName = info[2];
+                        int fileLength = Integer.valueOf(info[3]);
+                        serverData.waitUserChecker();
+                        File f = FileUtils.FileSend.receiveFileProtocol(this, fileName, fileLength, null);
+                        if(remoteId != -1) serverData.sendFile(remoteId,fileName, f);
+                        serverData.signalUserChecker();
+                        break;
                     default:
-                        System.out.println("["+info[1]+"] Error: Wrong command received.");
+                        System.out.println("["+info[1]+"] Error: Wrong command received: "+ info[0]);
                         datosEnviar=new Message(MessageKind.ERR,new String[]{"El código de mensaje es incorrecto."}).toMessage();
                         break;
                 };
@@ -201,4 +211,21 @@ class ProcesadorMSN extends Thread{
     public Socket getSocket(){
         return socketServicio;
     }
+    
+    public OutputStream getOutputStream() throws IOException{
+        return socketServicio.getOutputStream();
+    }
+    
+    public OutputStreamWriter getOutputStreamWriter(){
+        return outputStream;
+    }
+    
+    public Scanner getInputScanner(){
+        return inputStream;
+    }
+    
+    public InputStream getInputStream() throws IOException{
+        return socketServicio.getInputStream();
+    }
+    
 }

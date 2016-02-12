@@ -5,6 +5,7 @@ package Model;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -45,7 +46,7 @@ public class ServerData {
     private boolean privateMode[] = new boolean[MAX_USERS];
     
     /**
-     * Maximum period of inactivity available before removing a user (in ms).
+     * Maximum period of inactivity available before removing a user (in s).
      */
     private static final int MAX_INACTIVE_PERIOD = 30;
     
@@ -55,6 +56,11 @@ public class ServerData {
      * Period the server checks inactive users.
      */
     private static final int CHECKER_PERIOD = 30000;
+    
+    /**
+     * UserChecker semaphore count.
+     */
+    private int userCheckerWait;
     
     /**
      * Utility to get time difference between two dates.
@@ -89,6 +95,7 @@ public class ServerData {
             }
         });
         
+        userCheckerWait = 0;
         this.userChecker.start();
     }
     
@@ -249,50 +256,57 @@ public class ServerData {
         }
     }
     
-    /**
-     * 
-     * @param id Cliente id. CAN be -1 to send to all the file and -2 to send to selected.
-     * @param name
-     * @param data 
-     */
-    public synchronized void sendFile(Socket s, String name, byte[] data){
-        boolean all = false, selected = false;
-        String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length)}).toMessage();
-        OutputStream os = null;
-        OutputStreamWriter o = null;
-        if(all){
-            
+    public synchronized void sendFile(int id, String name, File f){
+        
+        try{
+            if(this.privateMode[id]){
+                sendFileToSelected(id,name,FileUtils.FileSend.loadFile(f.getAbsolutePath()));
+            }
+            else{
+                sendFileToAll(name,FileUtils.FileSend.loadFile(f.getAbsolutePath()));
+                sendTo(id, new Message(MessageKind.OK, null).toMessage());
+            }
         }
-        else if(selected){
-            
-        }
-        else{
-            try{
-                os = s.getOutputStream();
-                o = new OutputStreamWriter(os,"UTF-8");
-                
-                System.out.println("Se enviarán "+data.length+" B a [USER]");
-                o.write(msgcab);
-                o.flush();
-                os.write(data, 0, data.length);
-                //o.write(new String(data,StandardCharsets.UTF_8));
-                //outputStreams[id].write("\n\nENDFILE\n\n");
-                o.flush();
-                System.out.println(data.length + " B enviados a [USER]");
-                
-            }
-            catch(Exception ex){
-                System.err.println("Error: "+ex.getMessage());
-            }
-            finally{
-                try{
-                if(os != null) o.close();
-                if(o != null) o.close();
-                }catch(Exception ex){}
-            }
-            
+        catch(Exception ex){
+            System.err.println("Error: No se pudo iniciar el envío del archivo. "
+                +ex.getMessage());
         }
         
     }
     
+    
+    public synchronized void waitUserChecker(){
+        userCheckerWait++;
+        if(userCheckerWait > 0) userChecker.stop();
+    }
+    
+    public synchronized void signalUserChecker(){
+        userCheckerWait--;
+        if(userCheckerWait <= 0){
+            userCheckerWait = 0;
+            if(!userChecker.isRunning()) userChecker.start();
+        }
+    }
+        
+    public synchronized void sendFile(ProcesadorMSN p, String name, byte[] data){
+        FileUtils.FileSend.sendFile(p, data, name, null);
+    }
+    
+    public synchronized void sendFileToAll(String name, byte[] data){
+        for(int i = 0; i < MAX_USERS; i++){
+            if(processors[i] != null && user_list[i].validState()){
+                FileUtils.FileSend.sendFile(processors[i], data, name, null);
+            }
+        }
+    }
+    
+    public synchronized void sendFileToSelected(int id, String name, byte[] data){
+        for(int j = 0; j < MAX_USERS; j++){
+            if(selectedUsers[id][j]){
+                if(processors[j] != null && user_list[j].validState()){
+                    FileUtils.FileSend.sendFile(processors[j], data, name, null);
+                }
+            }
+        }
+    }
 }

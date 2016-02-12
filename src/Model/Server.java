@@ -180,6 +180,9 @@ public class Server {
                                         System.out.println("Uso: KILL id <mensaje opcional>");
                                     }
                                     break;
+                                case "check":
+                                    serverData.checkUsers();
+                                    break;
                                 case "":
                                     break;
                                 default:

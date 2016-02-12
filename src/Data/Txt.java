@@ -73,8 +73,8 @@ public class Txt {
     /**
      * Version's data and compatibilities.
      */
-    public static final double VERSION_CODE = 3.2;
-    public static final double LAST_COMPATIBLE = 3.0;
+    public static final double VERSION_CODE = 3.3;
+    public static final double LAST_COMPATIBLE = 3.3;
     
     /**
      * Version's string.

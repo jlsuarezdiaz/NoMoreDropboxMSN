@@ -54,6 +54,8 @@
                           </Group>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="BtSendFile" min="-2" pref="44" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="jScrollPane1" max="32767" attributes="0"/>
                   </Group>
                   <Component id="MessageScroll" pref="771" max="32767" attributes="0"/>
@@ -100,6 +102,7 @@
                               <Component id="BtSend" min="-2" pref="101" max="-2" attributes="0"/>
                           </Group>
                           <Component id="jScrollPane1" alignment="1" min="-2" pref="99" max="-2" attributes="0"/>
+                          <Component id="BtSendFile" alignment="1" min="-2" pref="42" max="-2" attributes="0"/>
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -116,6 +119,7 @@
                               <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="ComboUserState" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="14" max="-2" attributes="0"/>
                           </Group>
                           <Component id="MyUserPanel" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -409,6 +413,17 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="BtRemoveActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="BtSendFile">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/Media/attach_icon.png"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" value="Enviar archivo"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="BtSendFileActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

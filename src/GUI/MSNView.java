@@ -28,6 +28,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollBar;
@@ -198,6 +201,8 @@ public class MSNView extends javax.swing.JFrame {
 
     }
 
+
+
     /**
      * Shows MSNView.
      */
@@ -317,6 +322,30 @@ public class MSNView extends javax.swing.JFrame {
         //    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
         //});
         desktopNotify(msg.getMessageData()[0]);
+    }
+    
+    /**
+     * Push a file to the view.
+     * @param fv FileView to push.
+     */
+    public void pushFile(FileView fv) {
+        boolean isOnBottom = MessageScroll.getVerticalScrollBar().getValue() == 
+                MessageScroll.getVerticalScrollBar().getMaximum()-MessageScroll.getVerticalScrollBar().getVisibleAmount();
+        
+        // --- AÑADIR LISTENERS --- //
+        MessagePanel.add(fv);
+        MessagePanel.repaint();
+        MessagePanel.revalidate();
+        
+        MessageScroll.validate();
+        
+        if(isOnBottom){
+            JScrollBar vertical = MessageScroll.getVerticalScrollBar();
+            vertical.setValue( vertical.getMaximum() );
+        }
+        
+        desktopNotify("[ARCHIVO] "+fv.getFileLoading());
+
     }
     
     /**
@@ -555,6 +584,7 @@ public class MSNView extends javax.swing.JFrame {
         BtCopy = new javax.swing.JButton();
         BtPaste = new javax.swing.JButton();
         BtRemove = new javax.swing.JButton();
+        BtSendFile = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Dropbox MSN");
@@ -703,6 +733,14 @@ public class MSNView extends javax.swing.JFrame {
             }
         });
 
+        BtSendFile.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/attach_icon.png"))); // NOI18N
+        BtSendFile.setToolTipText("Enviar archivo");
+        BtSendFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BtSendFileActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -725,6 +763,8 @@ public class MSNView extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(BtRemove, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(BtSendFile, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1))
                     .addComponent(MessageScroll, javax.swing.GroupLayout.DEFAULT_SIZE, 771, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
@@ -759,7 +799,8 @@ public class MSNView extends javax.swing.JFrame {
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(BtExit, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addComponent(BtSend, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(BtSendFile, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(20, 20, 20)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -772,7 +813,8 @@ public class MSNView extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(ComboUserState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(ComboUserState, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(14, 14, 14))
                             .addComponent(MyUserPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
@@ -947,6 +989,18 @@ public class MSNView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_UsersPanelMouseClicked
 
+    private void BtSendFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtSendFileActionPerformed
+        JFileChooser fc = new JFileChooser();
+        fc.setMultiSelectionEnabled(true);
+        int returnVal = fc.showDialog(this,"Enviar");
+        if(returnVal == JFileChooser.APPROVE_OPTION){
+            File[] files = fc.getSelectedFiles();
+            for(File f : files){
+                msn_ctrl.sendFile(f);
+            }
+        }
+    }//GEN-LAST:event_BtSendFileActionPerformed
+
     
 
 
@@ -957,6 +1011,7 @@ public class MSNView extends javax.swing.JFrame {
     private javax.swing.JToggleButton BtPrivate;
     private javax.swing.JButton BtRemove;
     private javax.swing.JButton BtSend;
+    private javax.swing.JButton BtSendFile;
     private javax.swing.JButton BtSettings;
     private javax.swing.JComboBox ComboUserState;
     private javax.swing.JPanel MessagePanel;

@@ -33,8 +33,8 @@ public class FileSend {
         OutputStreamWriter o = null;
         
         try{
-            os = c.getOutputStream(Communicator.FILE_CHANNEL);
-            o = c.getOutputStreamWriter(Communicator.FILE_CHANNEL);
+            os = c.getOutputStream();
+            o = c.getOutputStreamWriter();
 
             System.out.println("Se enviarán "+data.length+" B a [USER]");
             o.write(msgcab);
@@ -63,7 +63,7 @@ public class FileSend {
             byte[] read = new byte[size];
             int rec = 0;
             int totalRec = 0;
-            InputStream input = c.getInputStream(Communicator.FILE_CHANNEL);
+            InputStream input = c.getInputStream();
             
             if(view!=null){
                 view.updateView(totalRec, size);

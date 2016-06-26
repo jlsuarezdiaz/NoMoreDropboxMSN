@@ -39,7 +39,7 @@ public class FileSend {
             System.out.println("Se enviarán "+data.length+" B a [USER]");
             o.write(msgcab);
             o.flush();
-            os.write(data, 0, data.length);
+            os.write(data);
             //o.write(new String(data,StandardCharsets.UTF_8));
             //outputStreams[id].write("\n\nENDFILE\n\n");
             o.flush();
@@ -73,6 +73,7 @@ public class FileSend {
             do{
                 rec = input.read(read,totalRec,size-totalRec);
                 if(rec != -1) totalRec += rec;
+                System.out.println("REC = "+rec);
                 System.out.println(totalRec + " B recibidos.");
                 if(view != null) view.updateView(totalRec, size);
             }while(totalRec < size);

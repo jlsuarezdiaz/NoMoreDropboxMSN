@@ -160,6 +160,7 @@ public class ClientController implements Communicator{
                             if(info.length > 2){
                                 view.pushMessage(new Message(MessageKind.OK,new String[]{info[2]}));
                             }
+                            if(!updater.isRunning()) updater.start();
                             break;
                         case BYE:
                             setRunning(false);
@@ -213,6 +214,7 @@ public class ClientController implements Communicator{
     
     public synchronized void sendFile(File f){
         try{
+            updater.stop();
             FileUtils.FileSend.sendFileProtocol(f,clientControllerInstance);
         }
         catch(Exception ex){

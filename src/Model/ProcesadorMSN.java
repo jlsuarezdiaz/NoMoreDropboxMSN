@@ -76,6 +76,7 @@ class ProcesadorMSN extends Thread implements Communicator{
              
         do{
             try {
+                System.out.println("Thread "+remoteId+" waiting for message...");
                 //Leemos un nuevo mensaje.
                 while(!inputStream.hasNext() && running){}
                 if(!running) break;
@@ -83,10 +84,11 @@ class ProcesadorMSN extends Thread implements Communicator{
                 datosEnviar="";
                 datosRecibidos=inputStream.next();
                 String[] info = datosRecibidos.split(String.valueOf(ServerData.GS));
+                System.out.println("["+info[1]+"] "+info[0]+" received.");
                 
                 switch(MessageKind.valueOf(info[0])){
                     case LOGIN: //Fecha,Nombre
-                        System.out.println("["+info[1]+"] LOGIN received.");
+                        //System.out.println("["+info[1]+"] LOGIN received.");
                         int id = serverData.addUser(info[2],outputStream,this);    //Necesita Mutex
                         if(id == -1){
                             datosEnviar = new Message(MessageKind.ERR,new String[]{"Hay demasiados usuarios conectados. Inténtelo más tarde."}).toMessage();
@@ -94,43 +96,43 @@ class ProcesadorMSN extends Thread implements Communicator{
                         remoteId=id;
                         break;
                     case SEND:  //Fecha,ID, mensaje
-                        System.out.println("["+info[1]+"] SEND received.");
+                        //System.out.println("["+info[1]+"] SEND received.");
                         serverData.sendMessage(Integer.valueOf(info[2]),info[3]);                      
                         //datosEnviar = new Message(MessageKind.OK, null).toMessage();
                         break;
                     case CHANGEPRIVATE: //Fecha,ID
-                        System.out.println("["+info[1]+"] CHANGEPRIVATE received.");
+                        //System.out.println("["+info[1]+"] CHANGEPRIVATE received.");
                         boolean state1 = serverData.changePrivate(Integer.valueOf(info[2]));
                         //Mensaje de confirmación con el estado que se ha guardado en el servidor.
                         datosEnviar=new Message(MessageKind.CONFIRMPRV,new String[]{Boolean.toString(state1)}).toMessage();
                         break;
 
                     case CHANGESELECT: //Fecha,ID, UserChanged
-                        System.out.println("["+info[1]+"] CHANGESELECT received.");
+                        //System.out.println("["+info[1]+"] CHANGESELECT received.");
                         boolean state2 = serverData.changeSelect(Integer.valueOf(info[2]),Integer.valueOf(info[3]));
 
                         datosEnviar=new Message(MessageKind.CONFIRMSLCT,new String[]{info[3],Boolean.toString(state2)}).toMessage();
                         break;
                     case CHANGESTATE: //Fecha,ID,State
-                        System.out.println("["+info[1]+"] CHANGESTATE received.");
+                        //System.out.println("["+info[1]+"] CHANGESTATE received.");
                         UserState usrState = serverData.changeState(Integer.valueOf(info[2]),UserState.valueOf(info[3]));
 
                         datosEnviar=new Message(MessageKind.CONFIRMSTATE,new String[]{usrState.toString()}).toMessage();
                         break;
                     case LOGOUT:   //Fecha,ID
-                        System.out.println("["+info[1]+"] LOGOUT received.");
+                        //System.out.println("["+info[1]+"] LOGOUT received.");
                         serverData.removeUser(Integer.valueOf(info[2]));
                         
                         kill();
                         break;
 
                     case IMALIVE: //Fecha, ID
-                        System.out.println("["+info[1]+"] IMALIVE received.");
+                        //System.out.println("["+info[1]+"] IMALIVE received.");
                         serverData.updateUser(Integer.valueOf(info[2]));
                         break; 
                         
                     case VERSION: //Fecha, Version
-                        System.out.println("["+info[1]+"] VERSION received.");
+                        //System.out.println("["+info[1]+"] VERSION received.");
                         double clientVersion = Double.valueOf(info[2]);
                         if(clientVersion < Data.Txt.LAST_COMPATIBLE){
                             //UPDATE, Info, OptYes, OptNo, canContinue
@@ -151,7 +153,7 @@ class ProcesadorMSN extends Thread implements Communicator{
                         }
                         break;
                     case UPDATE:
-                        System.out.println("["+info[1]+"] UPDATE received.");
+                        //System.out.println("["+info[1]+"] UPDATE received.");
                         if(!Server.isThereJarFile()){
                             datosEnviar=new Message(MessageKind.ERR,
                                 new String[]{"No se puede descargar la actualización."}).toMessage();
@@ -167,13 +169,13 @@ class ProcesadorMSN extends Thread implements Communicator{
                         }
                         break;
                     case FILE: //FILE, date, name, length.
-                        System.out.println("["+info[1]+"] FILE received.");
+                        //System.out.println("["+info[1]+"] FILE received.");
                         String fileName = info[2];
                         int fileLength = Integer.valueOf(info[3]);
-                        serverData.waitUserChecker();
+                        serverData.setActivity(true, remoteId);
                         File f = FileUtils.FileSend.receiveFileProtocol(this, fileName, fileLength, null);
                         if(remoteId != -1) serverData.sendFile(remoteId,fileName, f);
-                        serverData.signalUserChecker();
+                        serverData.setActivity(false, remoteId);
                         break;
                     default:
                         System.out.println("["+info[1]+"] Error: Wrong command received: "+ info[0]);

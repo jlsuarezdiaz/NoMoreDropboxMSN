@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import static java.lang.Thread.sleep;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,6 +45,8 @@ public class ServerData {
     private boolean selectedUsers[][] = new boolean[MAX_USERS][MAX_USERS];
     
     private boolean privateMode[] = new boolean[MAX_USERS];
+    
+    private boolean activityFlag[] = new boolean[MAX_USERS];
     
     /**
      * Maximum period of inactivity available before removing a user (in s).
@@ -82,7 +85,7 @@ public class ServerData {
         for(int i = 0; i < MAX_USERS; i++){
             user_list[i] = new User();
             privateMode[i] = false;
-           
+            activityFlag[i] = false;
             for(int j = 0; j < MAX_USERS; j++){
                 selectedUsers[i][j] = false;
             }
@@ -121,9 +124,22 @@ public class ServerData {
     }
     
     public synchronized void sendToAll(String message){
-        for(OutputStreamWriter o: outputStreams){
+    /*    for(OutputStreamWriter o: outputStreams){
             if(o != null){
                 try{
+                    o.write(message);
+                    o.flush();
+                }
+                catch(Exception ex){
+                    System.err.println("Error al enviar mensaje: "+ex.getMessage());
+                }
+            }
+        }*/
+        for(int i = 0; i < MAX_USERS; i++){
+            if(processors[i] != null){
+                OutputStreamWriter o = processors[i].getOutputStreamWriter();
+                try{
+                    while(activityFlag[i]){ sleep(500); }
                     o.write(message);
                     o.flush();
                 }
@@ -239,7 +255,7 @@ public class ServerData {
         System.out.println("["+User.getDateFormat().format(d)+"] USER CHECKING Started.");
         for(int i = 0; i < MAX_USERS; i++){
             User u = user_list[i];
-            if(u.getDate() != null && (getTimeDifference(d,u.getDate()) > MAX_INACTIVE_PERIOD 
+            if(!activityFlag[i] && u.getDate() != null && (getTimeDifference(d,u.getDate()) > MAX_INACTIVE_PERIOD 
                     || u.getState() == UserState.OFF)){
                 //Si un usuario no ha dado señales de vida en cierto tiempo lo eliminamos.
                 sendTo(i, new Message(MessageKind.DISC, null).toMessage());
@@ -308,5 +324,9 @@ public class ServerData {
                 }
             }
         }
+    }
+    
+    public synchronized void setActivity(boolean b, int id){
+        this.activityFlag[id]=b;
     }
 }

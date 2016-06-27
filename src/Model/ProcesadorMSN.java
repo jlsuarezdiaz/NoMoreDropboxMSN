@@ -165,17 +165,27 @@ class ProcesadorMSN extends Thread implements Communicator{
                             //FILE, Extensión, data
                             datosEnviar=new Message(MessageKind.FILE,new String[]{"jar",dataStr}).toMessage();
                             System.out.println(dataStr.length() + " bloques enviados.");*/
-                            serverData.sendFile(this, f.getName(), data);
+                            serverData.sendFile(this, f.getName(), data, "SERVER");
                         }
                         break;
-                    case FILE: //FILE, date, name, length.
+                    case FILE: //FILE, date, name, length, sender
                         //System.out.println("["+info[1]+"] FILE received.");
                         String fileName = info[2];
                         int fileLength = Integer.valueOf(info[3]);
+                        String sender = info[4];
                         serverData.setActivity(true, remoteId);
                         File f = FileUtils.FileSend.receiveFileProtocol(this, fileName, fileLength, null);
-                        if(remoteId != -1) serverData.sendFile(remoteId,fileName, f);
+                        if(remoteId != -1) serverData.sendFile(remoteId,fileName, f, sender);
                         serverData.setActivity(false, remoteId);
+                        break;
+                    case WAIT:
+                        long time = Long.valueOf(info[2]);
+                        try {
+                            Thread.sleep(time);
+                        } catch (InterruptedException ex) {}
+
+                        break;
+                    case NOP:
                         break;
                     default:
                         System.out.println("["+info[1]+"] Error: Wrong command received: "+ info[0]);

@@ -272,14 +272,14 @@ public class ServerData {
         }
     }
     
-    public synchronized void sendFile(int id, String name, File f){
+    public synchronized void sendFile(int id, String name, File f, String sender){
         
         try{
             if(this.privateMode[id]){
-                sendFileToSelected(id,name,FileUtils.FileSend.loadFile(f.getAbsolutePath()));
+                sendFileToSelected(id,name,FileUtils.FileSend.loadFile(f.getAbsolutePath()), sender);
             }
             else{
-                sendFileToAll(name,FileUtils.FileSend.loadFile(f.getAbsolutePath()));
+                sendFileToAll(name,FileUtils.FileSend.loadFile(f.getAbsolutePath()), sender);
                 sendTo(id, new Message(MessageKind.OK, null).toMessage());
             }
         }
@@ -304,23 +304,23 @@ public class ServerData {
         }
     }
         
-    public synchronized void sendFile(ProcesadorMSN p, String name, byte[] data){
-        FileUtils.FileSend.sendFile(p, data, name, null);
+    public synchronized void sendFile(ProcesadorMSN p, String name, byte[] data, String sender){
+        FileUtils.FileSend.sendFile(p, data, name, null, sender);
     }
     
-    public synchronized void sendFileToAll(String name, byte[] data){
+    public synchronized void sendFileToAll(String name, byte[] data, String sender){
         for(int i = 0; i < MAX_USERS; i++){
             if(processors[i] != null && user_list[i].validState()){
-                FileUtils.FileSend.sendFile(processors[i], data, name, null);
+                FileUtils.FileSend.sendFile(processors[i], data, name, null, sender);
             }
         }
     }
     
-    public synchronized void sendFileToSelected(int id, String name, byte[] data){
+    public synchronized void sendFileToSelected(int id, String name, byte[] data, String sender){
         for(int j = 0; j < MAX_USERS; j++){
             if(selectedUsers[id][j]){
                 if(processors[j] != null && user_list[j].validState()){
-                    FileUtils.FileSend.sendFile(processors[j], data, name, null);
+                    FileUtils.FileSend.sendFile(processors[j], data, name, null, sender+" [MENSAJE PRIVADO]");
                 }
             }
         }

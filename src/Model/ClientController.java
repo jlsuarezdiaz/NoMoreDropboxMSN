@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -131,6 +132,7 @@ public class ClientController implements Communicator{
                 do{
                     while(!inputStream.hasNext()){}
                     buferRecepcion = inputStream.next();
+                    //System.out.println(buferRecepcion);//!!!!!!!!!!!//
                     info = buferRecepcion.split(String.valueOf(ServerData.GS));
                     System.out.println("["+info[1]+"] "+info[0]+" received.");
                     switch(MessageKind.valueOf(info[0])){
@@ -174,15 +176,27 @@ public class ClientController implements Communicator{
                             }
                             System.exit(0);
                             break;
-                        case FILE: //FILE, date, name, length.
+                        case FILE: //FILE, date, name, length, sender
                             String name = info[2];
+                            String sender = info[4];
                             int length = Integer.valueOf(info[3]);
+                            
                             FileView fv = new FileView();
                             fv.setView(name,0 , length, "B", "Descargando");
+                            fv.setMetaView(info[1], sender);
                             view.pushFile(fv);
                             view.messageSound();
                             File f = FileUtils.FileSend.receiveFileProtocol(clientControllerInstance, name, length, fv);
                             fv.setFile(f);
+                            break;
+                        case WAIT:
+                            long time = Long.valueOf(info[2]);
+                            try {
+                                Thread.sleep(time);
+                            } catch (InterruptedException ex) {}
+                            
+                            break;
+                        case NOP:
                             break;
                         default:
                             System.err.println("Respuesta inadecuada. Mensaje ignorado.");
@@ -213,15 +227,32 @@ public class ClientController implements Communicator{
     }
     
     public synchronized void sendFile(File f){
-        try{
-            updater.stop();
-            FileUtils.FileSend.sendFileProtocol(f,clientControllerInstance);
-        }
-        catch(Exception ex){
-            System.err.println("Error: "+ex.getMessage());
-            JOptionPane.showMessageDialog(view,"Error al enviar el archivo: "+
-                    ex.getMessage() , "ERROR", JOptionPane.ERROR_MESSAGE);
-        }
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                try{
+                    updater.stop();
+                    FileView fv = new FileView();
+                    fv.setView(f.getName(), 0, 0, "B", "Subiendo");
+                    fv.setMetaView(User.getDateFormat().format(new Date()), myUser.getName());
+                    view.pushFile(fv);
+                    fv.setFile(f);
+                    FileUtils.FileSend.sendFileProtocol(f,clientControllerInstance,fv,myUser.getName());
+                }
+                catch(Exception ex){
+                    System.err.println("Error: "+ex.getMessage());
+                    JOptionPane.showMessageDialog(view,"Error al enviar el archivo: "+
+                            ex.getMessage() , "ERROR", JOptionPane.ERROR_MESSAGE);
+                }
+                //sendAliveMessage();
+                
+                
+                
+            }
+        }).start();
+        
     }
 
     public void changePrivate(){

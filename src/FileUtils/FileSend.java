@@ -26,9 +26,10 @@ import java.util.logging.Logger;
  * @author Juan Luis
  */
 public class FileSend {
-    public static void sendFile(Communicator c, byte[] data, String name, LoadableView view){
+    public synchronized static void sendFile(Communicator c, byte[] data, String name, LoadableView view, String sender){
+        //System.out.println("SEND FILE STARTED");
         Socket s = c.getSocket();
-        String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length)}).toMessage();
+        String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length),sender}).toMessage();
         OutputStream os = null;
         OutputStreamWriter o = null;
         
@@ -36,14 +37,37 @@ public class FileSend {
             os = c.getOutputStream();
             o = c.getOutputStreamWriter();
 
-            System.out.println("Se enviarán "+data.length+" B a [USER]");
+            System.out.println("Se enviarán "+data.length+" B por "+sender);
             o.write(msgcab);
             o.flush();
-            os.write(data);
-            //o.write(new String(data,StandardCharsets.UTF_8));
-            //outputStreams[id].write("\n\nENDFILE\n\n");
-            o.flush();
-            System.out.println(data.length + " B enviados a [USER]");
+            
+            // Esperar confirmación
+            //System.out.println("Waiting confirmation...");
+            //c.getInputStream().read();
+            //System.out.println("Data reception confirmed.");
+            Thread.sleep(2000); //BEST CHAPUZA EVER
+            
+            //os.write(data);
+            int sentData = 0;
+            int packetSize;
+            
+            if(view!=null){
+                view.updateView(sentData, data.length);
+                view.showView();
+            }
+             
+            while(sentData < data.length){
+                packetSize = (data.length - sentData < 1460)?data.length - sentData:1460;
+                os.write(data, sentData, packetSize);
+                os.flush();
+                sentData+=packetSize;
+                System.out.println(sentData + " B enviados.");
+                if(view != null) view.updateView(sentData, data.length);
+            }
+            if(view!=null) view.hideView();
+            
+            //o.flush();
+            System.out.println(data.length + " B enviados por "+sender);
 
         }
         catch(Exception ex){
@@ -70,10 +94,17 @@ public class FileSend {
                 view.showView();
             }
             
+            //Enviar confirmación
+            //System.out.println("Prepared to receive data.");
+            //c.getOutputStreamWriter().write(new Message(MessageKind.WAIT, new String[]{Long.toString(1000)}).toMessage());
+            //c.getOutputStreamWriter().flush();
+            //s.getOutputStream().write(0);
+            //s.getOutputStream().flush();
+            
             do{
                 rec = input.read(read,totalRec,size-totalRec);
                 if(rec != -1) totalRec += rec;
-                System.out.println("REC = "+rec);
+                //System.out.println("REC = "+rec);
                 System.out.println(totalRec + " B recibidos.");
                 if(view != null) view.updateView(totalRec, size);
             }while(totalRec < size);
@@ -121,9 +152,9 @@ public class FileSend {
         return data;
     }
 
-    public static void sendFileProtocol(File f, Communicator c) throws IOException{    
+    public static void sendFileProtocol(File f, Communicator c, LoadableView lv,String sender) throws IOException{    
         byte[] data = FileUtils.FileSend.loadFile(f.getAbsolutePath());
-        FileUtils.FileSend.sendFile(c, data,f.getName(), null);    
+        FileUtils.FileSend.sendFile(c, data,f.getName(), lv, sender);    
     }
     
     public static File receiveFileProtocol(Communicator c,String name,int size, LoadableView v){

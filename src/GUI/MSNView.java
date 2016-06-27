@@ -344,8 +344,9 @@ public class MSNView extends javax.swing.JFrame {
             vertical.setValue( vertical.getMaximum() );
         }
         
-        desktopNotify("[ARCHIVO] "+fv.getFileLoading());
-
+        desktopNotify(fv.getSender()+": [ARCHIVO] "+fv.getFileLoading());
+        this.repaint();
+        this.revalidate();
     }
     
     /**

@@ -48,12 +48,14 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
         fileLab = new javax.swing.JLabel();
         downloadBt = new javax.swing.JButton();
         viewBt = new javax.swing.JButton();
+        dateLab = new javax.swing.JLabel();
+        senderLab = new javax.swing.JLabel();
 
         jLabel1.setText("jLabel1");
 
         setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
-        setMaximumSize(new java.awt.Dimension(675, 84));
-        setMinimumSize(new java.awt.Dimension(675, 84));
+        setMaximumSize(new java.awt.Dimension(675, 115));
+        setMinimumSize(new java.awt.Dimension(675, 115));
 
         iconLab.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/Extensions/_blank.png"))); // NOI18N
 
@@ -69,7 +71,16 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
             }
         });
 
+        viewBt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/loupe_icon.png"))); // NOI18N
         viewBt.setToolTipText("Visualizar archivo.");
+
+        dateLab.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
+        dateLab.setForeground(new java.awt.Color(0, 0, 255));
+        dateLab.setText("24/06/2016 23:30:00");
+
+        senderLab.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
+        senderLab.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        senderLab.setText("JuanAsh");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -80,29 +91,40 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(iconLab)
-                        .addGap(22, 22, 22)
+                        .addGap(81, 81, 81)
                         .addComponent(fileLab, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 161, Short.MAX_VALUE)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(downloadPb, javax.swing.GroupLayout.DEFAULT_SIZE, 651, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(dateLab, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(senderLab, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(viewBt, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(downloadBt, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(downloadPb, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(downloadBt, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(fileLab, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(iconLab)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(viewBt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(downloadBt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addGap(0, 6, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(viewBt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(downloadBt, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(18, 18, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 4, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(senderLab)
+                            .addComponent(dateLab))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(fileLab, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(iconLab))
+                        .addGap(18, 18, 18)))
                 .addComponent(downloadPb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
@@ -138,11 +160,13 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel dateLab;
     private javax.swing.JButton downloadBt;
     private javax.swing.JProgressBar downloadPb;
     private javax.swing.JLabel fileLab;
     private javax.swing.JLabel iconLab;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel senderLab;
     private javax.swing.JButton viewBt;
     // End of variables declaration//GEN-END:variables
 
@@ -159,13 +183,27 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
         this.unit = unit;
         this.action = action;
         
-        this.fileLab.setText(fileLoading);
+        this.fileLab.setText(fileLoading+ (curr<tot?" ("+action+")":""));
         this.downloadPb.setVisible(true);
         this.downloadPb.setMaximum(tot);
         this.downloadPb.setMinimum(0);
         this.downloadPb.setValue(curr);
+        this.downloadPb.setToolTipText(Integer.toString(curr)+" / "+Integer.toString(tot)+" "+unit);
+        
+        try{
+            String extension = fileLoading.substring(fileLoading.lastIndexOf(".")+1);
+            this.iconLab.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/Extensions/"+extension+".png")));
+        }
+        catch(Exception ex){
+            this.iconLab.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/Extensions/_blank.png")));
+        }
         this.repaint();
         this.revalidate();
+    }
+    
+    public void setMetaView(String date, String sender){
+        this.dateLab.setText(date);
+        this.senderLab.setText(sender);
     }
 
     @Override
@@ -189,6 +227,10 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
 
     public String getFileLoading() {
         return fileLoading;
+    }
+    
+    public String getSender(){
+        return senderLab.getText();
     }
     
     

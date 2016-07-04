@@ -6,8 +6,13 @@
 package GUI;
 
 import FileUtils.FileSend;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -73,6 +78,11 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
 
         viewBt.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/loupe_icon.png"))); // NOI18N
         viewBt.setToolTipText("Visualizar archivo.");
+        viewBt.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                viewBtActionPerformed(evt);
+            }
+        });
 
         dateLab.setFont(new java.awt.Font("Tahoma", 3, 11)); // NOI18N
         dateLab.setForeground(new java.awt.Color(0, 0, 255));
@@ -158,6 +168,54 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
         }
     }//GEN-LAST:event_downloadBtActionPerformed
 
+    private void viewBtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewBtActionPerformed
+        String extension = fileLoading.substring(fileLoading.lastIndexOf(".")+1);
+            switch(extension.toLowerCase()){
+                case "png":
+                case "gif":
+                case "jpeg":
+                case "jpg":
+                case "bmp":
+                case "wbmp":
+                    BufferedImage img = null;
+                    try {
+                        img = ImageIO.read(f);
+                        new ImageView(null, false).setView(img);
+                        
+                       
+                    } catch (Exception ex) {
+                        System.err.println("Error al cargar imagen: "+ex.getMessage());
+                        JOptionPane.showMessageDialog(this, "Error: No se pudo cargar la imagen", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }
+                    
+                
+                    break;
+                    
+                case "aif":
+                case "aiff":
+                case "fxm":
+                case "flv":
+                case "m3u8":
+                case "mp3":
+                case "mp4":
+                case "m4a":
+                case "m4v":
+                case "wav":
+                    try{
+                        new AudioView(null, false).setView(f);
+                    }
+                    catch(Exception ex){
+                        System.err.println("Error al reproducir audio: "+ex.getMessage());
+                        JOptionPane.showMessageDialog(this, "Error: No se pudo cargar el audio", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(this, "DISPLAY ERROR", 
+                        "No se reconoce el formato del archivo entre los conocidos por el programa.", JOptionPane.ERROR_MESSAGE);
+                    break;
+            }
+    }//GEN-LAST:event_viewBtActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel dateLab;
@@ -220,7 +278,34 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
         this.f = f;
         if(f.exists()){
             this.downloadBt.setVisible(true);
+            String extension = fileLoading.substring(fileLoading.lastIndexOf(".")+1);
+            switch(extension.toLowerCase()){
+                case "png":
+                case "gif":
+                case "jpeg":
+                case "jpg":
+                case "bmp":
+                case "wbmp":
+                    
+                case "aif":
+                case "aiff":
+                case "fxm":
+                case "flv":
+                case "m3u8":
+                case "mp3":
+                case "mp4":
+                case "m4a":
+                case "m4v":
+                case "wav":
+                    this.viewBt.setVisible(true);
+                    break;
+                default:
+                    this.viewBt.setVisible(false);
+                    break;
+            }
         }
+        
+        
         this.repaint();
         this.revalidate();
     }

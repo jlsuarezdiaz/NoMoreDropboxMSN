@@ -124,6 +124,7 @@ public class ServerData {
     }
     
     public synchronized void sendToAll(String message){
+        System.out.println(message);
     /*    for(OutputStreamWriter o: outputStreams){
             if(o != null){
                 try{
@@ -139,9 +140,11 @@ public class ServerData {
             if(processors[i] != null){
                 OutputStreamWriter o = processors[i].getOutputStreamWriter();
                 try{
-                    while(activityFlag[i]){ sleep(500); }
-                    o.write(message);
-                    o.flush();
+                    //while(activityFlag[i]){ sleep(500); }
+                    if(!activityFlag[i]){
+                        o.write(message);
+                        o.flush();
+                    }
                 }
                 catch(Exception ex){
                     System.err.println("Error al enviar mensaje: "+ex.getMessage());

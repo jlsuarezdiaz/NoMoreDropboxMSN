@@ -236,6 +236,7 @@ public class AudioView extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Media/msn_icon.png")));
+        setResizable(false);
 
         BtBackward.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/backward_button.png"))); // NOI18N
         BtBackward.setToolTipText("Rebobinar");

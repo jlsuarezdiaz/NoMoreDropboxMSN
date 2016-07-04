@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * @author Juan Luis
  */
 public class FileSend {
-    public synchronized static void sendFile(Communicator c, byte[] data, String name, LoadableView view, String sender){
+    public static void sendFile(Communicator c, byte[] data, String name, LoadableView view, String sender){
         //System.out.println("SEND FILE STARTED");
         Socket s = c.getSocket();
         String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length),sender}).toMessage();

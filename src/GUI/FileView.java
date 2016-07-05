@@ -177,10 +177,9 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
                 case "jpg":
                 case "bmp":
                 case "wbmp":
-                    BufferedImage img = null;
+                    
                     try {
-                        img = ImageIO.read(f);
-                        new ImageView(null, false).setView(img);
+                        new ImageView(null, false).setView(f);
                         
                        
                     } catch (Exception ex) {
@@ -207,6 +206,30 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
                     catch(Exception ex){
                         System.err.println("Error al reproducir audio: "+ex.getMessage());
                         JOptionPane.showMessageDialog(this, "Error: No se pudo cargar el audio", "ERROR", JOptionPane.ERROR_MESSAGE);
+                    }
+                    break;
+                case "txt":
+                case "c":
+                case "cpp":
+                case "css":
+                case "h":
+                case "hpp":
+                case "htm":
+                case "html":
+                case "java":
+                case "js":
+                case "php":   
+                case "py":
+                case "rb": 
+                case "sql":
+                case "sass":
+                case "scss":
+                    try{
+                        new TextFileView(null, false).setView(f);
+                    }
+                    catch(Exception ex){
+                        System.err.println("Error al cargar fichero de texto: "+ex.getMessage());
+                        JOptionPane.showMessageDialog(this, "Error: No se pudo cargar el fichero de texto.", "ERROR", JOptionPane.ERROR_MESSAGE);
                     }
                     break;
                 default:
@@ -297,6 +320,24 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
                 case "m4a":
                 case "m4v":
                 case "wav":
+                    
+                case "txt":
+                case "c":
+                case "cpp":
+                case "css":
+                case "h":
+                case "hpp":
+                case "htm":
+                case "html":
+                case "java":
+                case "js":
+                case "php":   
+                case "py":
+                case "rb": 
+                case "sql":
+                case "sass":
+                case "scss":
+                    
                     this.viewBt.setVisible(true);
                     break;
                 default:

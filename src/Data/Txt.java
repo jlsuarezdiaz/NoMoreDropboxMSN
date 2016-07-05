@@ -47,17 +47,20 @@ public class Txt {
             "\n- Añadidas notificaciones de escritorio."+
             "\n- Añadida configuración para las notificaciones de escritorio."+
             "\n- Solucionados algunos incidentes de desconexión."+
-            "\n- Nuevos comandos en el servidor.\n\n"
+            "\n- Nuevos comandos en el servidor.\n\n"+
+            "Versión 3.2 (2/2/2016):"+
+            "\n- Ligeras mejoras en la interfaz de envío de mensajes."+
+            "\n- Añadido el software para transferencia de archivos."+
+            "\n- Añadidos mecanismos para la actualización automática del programa.\n\n"
             ;
     
     /**
      * String with info about last version.
      */
     public static final String LAST_VERSION_INFO =
-            "Versión 3.2 (2/2/2016):"+
-            "\n- Ligeras mejoras en la interfaz de envío de mensajes."+
-            "\n- Añadido el software para transferencia de archivos."+
-            "\n- Añadidos mecanismos para la actualización automática del programa."
+        "Versión 3.3 (5/7/2016):"+
+        "\n- Añadido el envío de archivos."+
+        "\n- Añadida visualización de archivos de audio, imagen y texto plano.\n\n"
     ;
     
     /**

@@ -124,7 +124,7 @@ public class ServerData {
     }
     
     public synchronized void sendToAll(String message){
-        System.out.println(message);
+        //System.out.println(message);
     /*    for(OutputStreamWriter o: outputStreams){
             if(o != null){
                 try{

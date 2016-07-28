@@ -122,6 +122,12 @@ public class CSMessage {
      * 
      * IMALIVE:
      * 
-     * CHANGE_PRIV
+     * CHANGE_PRIV: mode (boolean)
+     * 
+     * CHANGE_SLCT: user (int), mode (boolean)
+     * 
+     * CHANGE_STATE: state (userState)
+     * 
+     * ERR_*: msg (String) [?]
      */
 }

@@ -27,12 +27,13 @@ public enum MessageKind {
     
     //2xx - OK Messages
     OK                 (200),
-    OK_SENT            (201),
-    OK_PRIV            (202),
-    OK_SLCT            (203),
-    OK_STATE           (204),
-    OK_FILE            (205),
-    OK_VERSION         (206),
+    OK_LOGIN           (201),
+    OK_SENT            (202),
+    OK_PRIV            (203),
+    OK_SLCT            (204),
+    OK_STATE           (205),
+    OK_FILE            (206),
+    OK_VERSION         (207),
     
     //3xx - Communication messages
     USERS              (300),

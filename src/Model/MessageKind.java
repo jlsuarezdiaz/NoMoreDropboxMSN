@@ -23,7 +23,8 @@ public enum MessageKind {
     LOGOUT             (103),
     DISC               (104),
     KILL               (105),
-    UPDATE_DOWNLOAD    (106),
+    VERSION            (106),
+    UPDATE_DOWNLOAD    (107),
     
     //2xx - OK Messages
     OK                 (200),

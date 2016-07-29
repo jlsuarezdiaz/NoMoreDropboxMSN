@@ -1,5 +1,7 @@
 /*
-
+ * Author: Juan Luis Suárez Díaz
+ * July, 2016
+ * No More Dropbox MSN
  */
 package Model;
 
@@ -31,11 +33,21 @@ import javax.swing.JOptionPane;
  * @author Juan Luis
  */
 public class Client {
+    /**
+     * Client configuration file name.
+     */
     private static final String configName = ".configc";
     
+    /**
+     * Server's host and port.
+     */
     public static final String host = readHost();
     public static final int port = readPort();
     
+    /**
+     * Obtains the host from the configuration file (or default host, if it doesn't exist).
+     * @return Server's host.
+     */
     private static final String readHost(){
         String rHost = "localhost"; //Default host.
         File file = new File(configName);
@@ -50,6 +62,10 @@ public class Client {
         return rHost;
     }
     
+    /**
+     * Obtains the port from the configuration file (or default port, if it doesn't exist).
+     * @return Server's port.
+     */
     private static final int readPort(){
         int rPort = 8928; //Default port.
                 String rHost = "localhost"; //Default host.
@@ -65,14 +81,25 @@ public class Client {
         return rPort;
     }
     
+    /**
+     * Client's main program
+     * @param args The command line arguments (no needed).
+     */
     public static void main(String[] args){
-        String buferEnvio;
-        String buferRecepcion;
+        MSNSocket msnSocket = null;
         
-       
+        //Creamos un MSNSocket que se conecte a host y a port.
+        try{
+            msnSocket = new MSNSocket(host, port);
+            ClientController c = new ClientController(msnSocket);
+        }
+        catch(IOException ex){
+            JOptionPane.showMessageDialog(null, "Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage() , "Error de conexión",JOptionPane.ERROR_MESSAGE);
+            System.err.println("Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage());
+        }
         
-        Socket socketServicio = null;
-        
+    }
+     /*   
         try{
             // Creamos un socket que se conecte a "host" y "port":
             //////////////////////////////////////////////////////
@@ -136,7 +163,7 @@ public class Client {
     }
     
     
-    
+/*    
     public static void lookForUpdates(Scanner input, OutputStreamWriter output,Socket s){
         try{
             String sendBuffer, getBuffer;
@@ -237,6 +264,6 @@ public class Client {
         }
         return ret;
     }
-    
+*/    
 
 }

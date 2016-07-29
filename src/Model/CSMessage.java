@@ -102,7 +102,7 @@ public class CSMessage {
      * 
      * OK: anything
      * 
-     * OK_SEND: userNum (int)?, msgNum (int)
+     * OK_SEND: msgReceiver (User), msgNum (int)
      * 
      * OK_PRIV: isPriv (boolean)
      * 
@@ -116,7 +116,7 @@ public class CSMessage {
      * 
      * USERS: userList (User[])
      * 
-     * SEND: senderNum (int), msgNum (int), text (String)
+     * SEND: sender (User), msgNum (int), msg (Message)
      * 
      * FILE:
      * 

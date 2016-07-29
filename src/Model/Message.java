@@ -19,7 +19,7 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
- * Class message. Contains all the information relative to a message.
+ * Class message. It represents the messages that users send in MSN.
  * @author Juan Luis
  */
 public class Message {
@@ -27,12 +27,7 @@ public class Message {
     /**
      * Message contents.
      */
-    private String[] messageData;
-    
-    /**
-     * Indicates de message modality.
-     */
-    private MessageKind kind;
+    private String messageData;
     
     /**
      * Message date.
@@ -40,206 +35,112 @@ public class Message {
     private Date date;
     
     /**
-     * Date Format.
+     * Index for the message.
      */
-    private static final DateFormat df = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    private int seqNumber;
     
     /**
-     * Input/Output delimiter.
+     * User who sent the message.
      */
-    private static final String IO_LIM = "\0";
+    private User sender;
+    
+    /**
+     * Indicates if the message is public.
+     */
+    private boolean isPublic;
+    
+    /**
+     * Indicates the message status (sending, received, doble check azul,...)
+     */
+    private MessageStatus status;
     
     /**
      * Private method to set message attributes.
-     * @param sender
-     * @param text
-     * @param isPublic 
+     * @param text Message text.
+     * @param sender User who sends the message.
+     * @param seqNumber Message index.
+     * @param isPublic Indicates if the message is public or private.
      */
-    private void set(MessageKind kind, String[] msgData){
-        this.kind = kind;
+    private void set(String text,User sender, int seqNumber, boolean isPublic){
+        this.messageData = text;
         this.date = new Date();
-        this.messageData=msgData;
+        this.sender = sender;
+        this.seqNumber = seqNumber;
+        this.isPublic = isPublic;
+        this.status = MessageStatus.UNDEFINED;
     }
     
     /**
      * Default constructor.
      */
     public Message(){
-        set(MessageKind.ERR,null);
+        set("",null,-1,true);
     }
+    
     /**
      * Constructor.
-     * @param sender
-     * @param text
-     * @param isPublic 
+     * @param text Message text.
+     * @param sender User who sends the message.
+     * @param seqNumber Message index.
+     * @param isPublic Indicates if the message is public or private.
      */
-    public Message(MessageKind kind,String[] msgData){
-        set(kind,msgData);
+    public Message(String text,User sender, int seqNumber, boolean isPublic){
+        set(text, sender, seqNumber, isPublic);
     }
     
     /**
-     * Constructor. By default, a message is public.
-     * @param sender
-     * @param text 
+     * Gets the text of the message.
+     * @return Message text.
      */
-/*    public Message(String sender, String text){
-        set(sender,text,MessageKind.PUBLIC);
-    }*/
-    
-    /**
-     * 
-     * @return sender 
-     */
-/*    public String getSender(){
-        return sender;
-    }*/
-    
-    /**
-     * 
-     * @return text. 
-     */
-/*    public String getText(){
-        return text;
-    }*/
-    
-    /**
-     * 
-     * @return isPublic
-     */
-    public MessageKind getKind(){
-        return kind;
-    }
-    
-    /**
-     * 
-     * @return date 
-     */
-    public Date getDate(){
-        return date;
-    }
-    
-    public String[] getMessageData(){
+    public String getText(){
         return messageData;
     }
     
     /**
-     * 
-     * @return Date format. 
+     * Gets the date of the message.
+     * @return Message date. 
      */
-    public static DateFormat getDateFormat(){
-        return df;
+    public Date getDate(){
+        return date;
+    }
+
+    /**
+     * Gets the message status.
+     * @return Message status.
+     */
+    public MessageStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Indicates if message is public or private.
+     * @return True, if and only if message is public.
+     */
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    /**
+     * Sets the message status.
+     * @param status Status to set.
+     */
+    public void setStatus(MessageStatus status) {
+        this.status = status;
     }
     
     /**
-     * Writes the message in a file.
-     * @param filename File's name.
+     * Adds a header to the message text.
+     * @param header Text to add as header.
      */
-/*    public void write(String filename){
-        //FileWriter fw = null;
-        OutputStreamWriter fw = null;
-        try{
-            //fw = new FileWriter(filename);
-            fw = new OutputStreamWriter(new FileOutputStream(filename),"UTF-8");
-            fw.write(sender + IO_LIM + text + IO_LIM + kind.toString() + IO_LIM + df.format(date) + IO_LIM);
-        }
-        catch(IOException ex){}
-        finally{
-            try{
-                if(fw != null) fw.close();
-            }
-            catch(IOException ex){}
-        }
-    }*/
-    
-    /**
-     * Reads the message from a file.
-     * @param filename File's name.
-     */
-/*    public void read(String filename){
-        Scanner scan = null;
-        File f = new File(filename);
-        
-        if(f.exists()){
-            try {
-                scan = new Scanner(f,"UTF-8");
-                scan.useDelimiter(IO_LIM);
-                sender = scan.next();
-                text = scan.next();
-                kind = MessageKind.valueOf(scan.next());
-                date = df.parse(scan.next());
-            } catch (FileNotFoundException ex){}
-            // For invalid message reading.
-            catch(NoSuchElementException | ParseException ex){ scan.close(); f.delete();}
-            finally{
-                if(scan != null) scan.close();
-            }
-            //System.out.println("Leido OK " + filename);
-        }
-    }*/
-    
-    /**
-     * Checks if a message is empty.
-     * @return 
-     */
-/*    public boolean isEmpty(){
-        return ("".equals(this.sender) || " ".equals(this.sender)) && ("".equals(this.text) || " ".equals(this.text));
-    }*/
-    
-    /**
-     * Obtains a string with the message.
-     * @return String with the message.
-     */
-/*    @Override
-    public String toString(){
-        String ret = "";
-        if(kind == MessageKind.PUBLIC)
-            ret = (sender + " dice: " + text);
-        else if(kind == MessageKind.PRIVATE)
-            ret = ("Mensaje privado de " + sender + ": " + text);
-        else if(kind == MessageKind.BEGIN)
-            ret = (sender + " ha iniciado sesión.");
-        else if(kind == MessageKind.END)
-            ret = (sender + " se ha desconectado.");
-        else if(kind == MessageKind.JUSTTEXT)
-            ret = text;
-        
-        return ret;
-        //return ((isPublic)?(sender + " dice: "):("Mensaje privado de " + sender + ": ")) + text;
-    }*/
-    
-    public String toMessage(){
-        String str = kind.toString()+ServerData.GS+getDateFormat().format(getDate())+ServerData.GS;
-        if(messageData!=null)
-            for(String s:messageData){
-                str += s+ServerData.GS;
-            }
-        return str+ServerData.FS;
+    public void addHeader(String header){
+        this.messageData=header+this.messageData;
     }
     
     /**
-     * Obtains a string with all the message information.
-     * @return String with message info.
+     * Indicates whether message content has any text.
+     * @return true, when message text is empty. Else, false.
      */
-/*    public String toStringXL(){
-        return "[" + getDateFormat().format(getDate()) + "] " + toString();
-    }*/
-    
-    /**
-     * Message comparer.
-     * @param obj Object to compare
-     * @return true if and only if messages are equal.
-     */
-/*    @Override
-    public boolean equals(Object obj){
-        if(obj == null)
-            return false;
-        if(obj == this)
-            return true;
-        if(!(obj.getClass().getSimpleName().equals("Message")))
-            return false;
-        
-        Message msg = (Message) obj;
-        return this.sender.equals(msg.getSender()) && this.text.equals(msg.getText()) 
-                && this.kind.equals(msg.getKind()) && this.date.equals(msg.getDate());
-    }*/
+    public boolean isEmpty(){
+        return messageData.trim().isEmpty();
+    }
 }

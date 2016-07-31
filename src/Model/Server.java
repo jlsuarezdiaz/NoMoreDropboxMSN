@@ -79,19 +79,24 @@ public class Server {
                                     System.exit(0);
                                     break;
                                 case "send":
-                                    serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{cmd.split("^send\\s+")[1]}).toMessage());
+                                    serverData.sendToAll(new CSMessage(MessageKind.SEND,new Object[]{
+                                        new Message(cmd.split("^send\\s+")[1],null,-1, true)}));
                                     break;
                                 case "sendasserver":
                                 case "sas":
-                                    serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{"Mensaje del Servidor de No More Dropbox MSN: "+cmd.split("^(sendasserver|sas)\\s+")[1]}).toMessage());
+                                    serverData.sendToAll(new CSMessage(MessageKind.SEND,new Object[]{
+                                        new Message("Mensaje del Servidor de No More Dropbox MSN: "+
+                                                cmd.split("^(sendasserver|sas)\\s+")[1],null,-1,true)}));
                                     break;
                                 case "notifyrestart":
                                 case "nrst":
-                                    serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{"El servidor va a reiniciarse pronto. Finaliza tus conversaciones y guarda con tiempo la información que desees."}).toMessage());
+                                    serverData.sendToAll(new CSMessage(MessageKind.SEND,new Object[]{
+                                        new Message("El servidor va a reiniciarse pronto. Finaliza tus conversaciones y guarda con tiempo la información que desees.",null,-1, true)}));
                                     break;
                                 case "notifyclose":
                                 case "ncls":
-                                    serverData.sendToAll(new Message(MessageKind.RECEIVEMSG,new String[]{"El servidor va a cerrarse pronto. Finaliza tus conversaciones y guarda con tiempo la información que desees."}).toMessage());
+                                    serverData.sendToAll(new CSMessage(MessageKind.SEND,new Object[]{
+                                        new Message("El servidor va a cerrarse pronto. Finaliza tus conversaciones y guarda con tiempo la información que desees.",null,-1, true)}));
                                     break;
                                 case "port":
                                     System.out.println("El servidor está escuchando por el puerto "+Integer.toString(port));
@@ -139,7 +144,7 @@ public class Server {
                                 case "disc":
                                     try{
                                     if(args.length > 1){
-                                        serverData.sendTo(Integer.valueOf(args[1]),new Message(MessageKind.DISC, null).toMessage());
+                                        serverData.sendTo(Integer.valueOf(args[1]),new CSMessage(MessageKind.DISC, null));
                                     }
                                     else throw new IllegalArgumentException("Illegal arguments.");
                                     }
@@ -169,10 +174,10 @@ public class Server {
                                 case "kill":
                                     try{
                                     if(args.length > 2){
-                                        serverData.sendTo(Integer.valueOf(args[1]),new Message(MessageKind.KILL, new String[]{cmd.split("^kill\\s+[0-9]+")[1]}).toMessage());
+                                        serverData.sendTo(Integer.valueOf(args[1]),new CSMessage(MessageKind.KILL, new Object[]{cmd.split("^kill\\s+[0-9]+")[1]}));
                                     }
                                     else if(args.length > 1){
-                                        serverData.sendTo(Integer.valueOf(args[1]),new Message(MessageKind.KILL, null).toMessage());                                       
+                                        serverData.sendTo(Integer.valueOf(args[1]),new CSMessage(MessageKind.KILL, null));                                       
                                     }
                                     else throw new IllegalArgumentException("Illegal arguments.");
                                     }
@@ -229,7 +234,7 @@ public class Server {
             // Abrimos el socket en modo pasivo, escuchando el en puerto indicado por "port"
             //////////////////////////////////////////////////
             serverSocket=new ServerSocket(port);
-            System.out.println("["+Message.getDateFormat().format(new Date())+"] Server started.");
+            System.out.println("["+MSNDateFormat.getInstance().format(new Date())+"] Server started.");
             Server.serverSocket = serverSocket;
             //////////////////////////////////////////////////
             //Abrimos la hebra lectora del servidor, que permite la interactividad.

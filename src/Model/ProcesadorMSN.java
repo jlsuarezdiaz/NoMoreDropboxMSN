@@ -25,51 +25,50 @@ import java.util.logging.Logger;
  *
  * @author Juan Luis
  */
-class ProcesadorMSN extends Thread implements Communicator{
-    //Referencia al servidor
+class ProcesadorMSN extends Thread{
+    /**
+     * Server monitor.
+     */
     private ServerData serverData;
     
-    // Referencia a un socket para enviar/recibir las peticiones/respuestas
-    private Socket socketServicio;
-    // stream de lectura (por aquí se recibe lo que envía el cliente)
-    //private BufferedReader inputStream;
-    private Scanner inputStream;
-    // stream de escritura (por aquí se envía los datos al cliente)
-    private OutputStreamWriter outputStream;
+    /**
+     * Socket for communication with client.
+     */
+    private MSNSocket serviceSocket;
+    
     
     /**
      * Indicates whether this processor thread is still alive.
      */
     private boolean running;
     
-    
-    // Constructor que tiene como parámetro una referencia al socket abierto en por otra clase
+    /**
+     * Constructir.
+     * @param socketServicio Java socket to client.
+     * @param s ServerData monitor.
+     */
     public ProcesadorMSN(Socket socketServicio,ServerData s) {
-        this.socketServicio=socketServicio;
-        this.serverData = s;
-            
-            // Obtiene los flujos de escritura/lectura
-        try{
-            inputStream=new Scanner(socketServicio.getInputStream(),"UTF-8");
-            outputStream=new OutputStreamWriter(socketServicio.getOutputStream(),"UTF-8");
-            inputStream.useDelimiter(String.valueOf(ServerData.FS));
+        try {
+            this.serviceSocket = new MSNSocket(socketServicio);
         }
         catch(Exception ex){
             System.err.println("Error al crear el flujo E/S: "+ex.getMessage());
         }
         this.running=true;
     }
-
+    
+    /**
+     * Processor method.
+     */
     private void procesa() {
-        String datosRecibidos;
-        String datosEnviar = "";
+        CSMessage receivedData;
+        CSMessage sendData = null;
         int remoteId = -1;
         
         //Nueva conexión. Enviamos el mensaje de saludo.
-        System.out.println("["+Message.getDateFormat().format(new Date())+"] New connection.");
+        System.out.println("["+MSNDateFormat.getInstance().format(new Date())+"] New connection.");
         try {
-            outputStream.write(new Message(MessageKind.HELO,null).toMessage());
-            outputStream.flush();
+            serviceSocket.writeMessage(new CSMessage(MessageKind.HELO,null));
         } catch (IOException ex) {
             System.err.println("Error al saludar al cliente.");
         }
@@ -77,81 +76,63 @@ class ProcesadorMSN extends Thread implements Communicator{
         do{
             try {
                 System.out.println("Thread "+remoteId+" waiting for message...");
-                //Leemos un nuevo mensaje.
-                while(!inputStream.hasNext() && running){}
-                if(!running) break;
+                                
+                receivedData = serviceSocket.readMessage();
+                sendData = null;
                 
-                datosEnviar="";
-                datosRecibidos=inputStream.next();
-                String[] info = datosRecibidos.split(String.valueOf(ServerData.GS));
-                System.out.println("["+info[1]+"] "+info[0]+" received.");
+                System.out.println("["+receivedData.getDate()+"] "+receivedData.getMessageKind()+" received.");
                 
-                switch(MessageKind.valueOf(info[0])){
-                    case LOGIN: //Fecha,Nombre
-                        //System.out.println("["+info[1]+"] LOGIN received.");
-                        int id = serverData.addUser(info[2],outputStream,this);    //Necesita Mutex
-                        if(id == -1){
-                            datosEnviar = new Message(MessageKind.ERR,new String[]{"Hay demasiados usuarios conectados. Inténtelo más tarde."}).toMessage();
-                        }
+                switch(receivedData.getMessageKind()){
+                    case LOGIN: 
+                        int id = serverData.addUser((String)receivedData.getData(0),this);    //Necesita Mutex
                         remoteId=id;
                         break;
                     case SEND:  //Fecha,ID, mensaje
-                        //System.out.println("["+info[1]+"] SEND received.");
-                        serverData.sendMessage(Integer.valueOf(info[2]),info[3]);                      
-                        //datosEnviar = new Message(MessageKind.OK, null).toMessage();
+                        serverData.sendMessage(remoteId,receivedData);                      
                         break;
-                    case CHANGEPRIVATE: //Fecha,ID
-                        //System.out.println("["+info[1]+"] CHANGEPRIVATE received.");
-                        boolean state1 = serverData.changePrivate(Integer.valueOf(info[2]));
-                        //Mensaje de confirmación con el estado que se ha guardado en el servidor.
-                        datosEnviar=new Message(MessageKind.CONFIRMPRV,new String[]{Boolean.toString(state1)}).toMessage();
+                    case CHANGE_PRIV: //Fecha,ID
+                        boolean state1 = serverData.changePrivate(remoteId);
+                        sendData=new CSMessage(MessageKind.OK_PRIV,new Object[]{state1});
                         break;
 
-                    case CHANGESELECT: //Fecha,ID, UserChanged
-                        //System.out.println("["+info[1]+"] CHANGESELECT received.");
-                        boolean state2 = serverData.changeSelect(Integer.valueOf(info[2]),Integer.valueOf(info[3]));
-
-                        datosEnviar=new Message(MessageKind.CONFIRMSLCT,new String[]{info[3],Boolean.toString(state2)}).toMessage();
+                    case CHANGE_SLCT: //Fecha,ID, UserChanged
+                        int chgId = (int)receivedData.getData(0);
+                        boolean state2 = serverData.changeSelect(remoteId, chgId);
+                        sendData=new CSMessage(MessageKind.OK_SLCT,new Object[]{chgId,state2});
                         break;
-                    case CHANGESTATE: //Fecha,ID,State
-                        //System.out.println("["+info[1]+"] CHANGESTATE received.");
-                        UserState usrState = serverData.changeState(Integer.valueOf(info[2]),UserState.valueOf(info[3]));
-
-                        datosEnviar=new Message(MessageKind.CONFIRMSTATE,new String[]{usrState.toString()}).toMessage();
+                    case CHANGE_STATE: //Fecha,ID,State
+                        UserState usrState = serverData.changeState(remoteId,(UserState)receivedData.getData(0));
+                        sendData=new CSMessage(MessageKind.OK_STATE,new Object[]{usrState});
                         break;
-                    case LOGOUT:   //Fecha,ID
-                        //System.out.println("["+info[1]+"] LOGOUT received.");
-                        serverData.removeUser(Integer.valueOf(info[2]));
-                        
-                        kill();
+                    case LOGOUT:   
+                        serverData.removeUser(Integer.valueOf(remoteId));
                         break;
 
-                    case IMALIVE: //Fecha, ID
-                        //System.out.println("["+info[1]+"] IMALIVE received.");
-                        serverData.updateUser(Integer.valueOf(info[2]));
+                    case IMALIVE: 
+                        serverData.updateUser(remoteId);
                         break; 
                         
                     case VERSION: //Fecha, Version
-                        //System.out.println("["+info[1]+"] VERSION received.");
-                        double clientVersion = Double.valueOf(info[2]);
+                        double clientVersion = (double) receivedData.getData(0);
                         if(clientVersion < Data.Txt.LAST_COMPATIBLE){
                             //UPDATE, Info, OptYes, OptNo, canContinue
-                            datosEnviar=new Message(MessageKind.UPDATE,
-                                new String[]{"Necesita actualizar NoMoreDropboxMSN a su versión más reciente para poder seguir utilizándolo.",
-                                "Actualizar","Salir",Boolean.toString(false)}
-                            ).toMessage();
+                            sendData=new CSMessage(MessageKind.ERR_NEEDUPDATE,
+                                new Object[]{"Necesita actualizar NoMoreDropboxMSN a su versión más reciente para poder seguir utilizándolo.",
+                                "Actualizar","Salir",}
+                            );
                         }
                         else if(clientVersion < Data.Txt.VERSION_CODE){
                             //UPDATE, Info, OptYes, OptNo, canContinue
-                            datosEnviar=new Message(MessageKind.UPDATE,
-                                new String[]{"Hay una versión más reciente disponible de NoMoreDropboxMSN. ¿Desea actualizar?",
-                                "Actualizar","No actualizar",Boolean.toString(true)}
-                            ).toMessage();
+                            sendData=new CSMessage(MessageKind.WARN_NOTUPATED,
+                                new Object[]{"Hay una versión más reciente disponible de NoMoreDropboxMSN. ¿Desea actualizar?",
+                                "Actualizar","No actualizar"}
+                            );
                         }
                         else{
-                            datosEnviar=new Message(MessageKind.OK,null).toMessage();
+                            sendData=new CSMessage(MessageKind.OK_VERSION,null);
                         }
                         break;
+                     /*
                     case UPDATE:
                         //System.out.println("["+info[1]+"] UPDATE received.");
                         if(!Server.isThereJarFile()){
@@ -161,10 +142,10 @@ class ProcesadorMSN extends Thread implements Communicator{
                         else{
                             File f = new File("./NoMoreDropboxMSN.jar");
                             byte[] data = Files.readAllBytes(f.toPath());
-                            /*String dataStr = new String(data,StandardCharsets.UTF_8);
+                            
                             //FILE, Extensión, data
                             datosEnviar=new Message(MessageKind.FILE,new String[]{"jar",dataStr}).toMessage();
-                            System.out.println(dataStr.length() + " bloques enviados.");*/
+                            System.out.println(dataStr.length() + " bloques enviados.");
                             serverData.sendFile(this, f.getName(), data, "SERVER");
                         }
                         break;
@@ -178,32 +159,25 @@ class ProcesadorMSN extends Thread implements Communicator{
                         if(remoteId != -1) serverData.sendFile(remoteId,fileName, f, sender);
                         serverData.setActivity(false, remoteId);
                         break;
-                    case WAIT:
-                        long time = Long.valueOf(info[2]);
-                        try {
-                            Thread.sleep(time);
-                        } catch (InterruptedException ex) {}
-
-                        break;
+                    */
                     case NOP:
                         break;
                     default:
-                        System.out.println("["+info[1]+"] Error: Wrong command received: "+ info[0]);
-                        datosEnviar=new Message(MessageKind.ERR,new String[]{"El código de mensaje es incorrecto."}).toMessage();
+                        System.out.println("["+MSNDateFormat.getInstance().format(receivedData.getDate())+"] Error: Wrong command received: "+ receivedData.getMessageKind());
+                        sendData=new CSMessage(MessageKind.ERR_BADREQUEST,new Object[]{"El código de mensaje es incorrecto."});
                         break;
                 };
 
-                if(!datosEnviar.equals("")){
-                    outputStream.write(datosEnviar);
-                    outputStream.flush();
+                if(sendData!=null){
+                    serviceSocket.writeMessage(sendData);
                 }
 
             } catch (Exception ex) {
                 //System.err.println("Error al obtener los flujos de entrada/salida.");      
                 System.err.println("Error en el procesador:\n"+ ex.getMessage());
             }
-        }while(true);
-        System.out.println("["+Message.getDateFormat().format(new Date())+"] Connection ended.");
+        }while(running);
+        System.out.println("["+MSNDateFormat.getInstance().format(new Date())+"] Connection ended.");
 
     }
     
@@ -214,30 +188,14 @@ class ProcesadorMSN extends Thread implements Communicator{
     
     public void kill(){
         try{
-            socketServicio.close();
+            serviceSocket.close();
         }
         catch(Exception ex){}
         this.running=false;
     }
     
-    public Socket getSocket(){
-        return socketServicio;
-    }
-    
-    public OutputStream getOutputStream() throws IOException{
-        return socketServicio.getOutputStream();
-    }
-    
-    public OutputStreamWriter getOutputStreamWriter(){
-        return outputStream;
-    }
-    
-    public Scanner getInputScanner(){
-        return inputStream;
-    }
-    
-    public InputStream getInputStream() throws IOException{
-        return socketServicio.getInputStream();
+    public MSNSocket getSocket(){
+        return serviceSocket;
     }
     
 }

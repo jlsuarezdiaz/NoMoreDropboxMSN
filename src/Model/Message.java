@@ -105,6 +105,25 @@ public class Message {
     }
 
     /**
+     * Gets the message number.
+     * @return Message number.
+     */
+    public int getSeqNumber() {
+        return seqNumber;
+    }
+
+    /**
+     * Gets the message sender.
+     * @return Sender.
+     */
+    public User getSender() {
+        return sender;
+    }
+    
+    
+    
+
+    /**
      * Gets the message status.
      * @return Message status.
      */

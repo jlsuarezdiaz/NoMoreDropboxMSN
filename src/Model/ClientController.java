@@ -26,7 +26,7 @@ import javax.swing.Timer;
  *
  * @author Juan Luis
  */
-public class ClientController implements Communicator{
+public class ClientController{
     /**
      * View associated to controller.
      */
@@ -107,6 +107,7 @@ public class ClientController implements Communicator{
         }
         //this.updater.start();
         this.clientControllerInstance = this;
+        sentMessages = new ArrayList();
     }
     
 
@@ -124,26 +125,7 @@ public class ClientController implements Communicator{
         return myId;
     }
     
-    //Actualiza la información de los usuarios con el mensaje recibido por el servidor.
-    public void scanUsers(String userInfo){
-        String [] userData = userInfo.split(String.valueOf(ServerData.RS));
-        String [] userFields = null;
-        for(int i = 0; i < User.getMaxUsers();i++){
-            if(userData[i].equals("\0")){
-                userList[i]=null;
-            }
-            else{
-                userFields = userData[i].split(String.valueOf(ServerData.US));
-                try{
-                    userList[i] = new User(userFields[0],UserState.valueOf(userFields[1]),User.getDateFormat().parse(userFields[2]));
-                }catch(Exception ex){
-                    userList[i] = new User(userFields[0],UserState.valueOf(userFields[1]),null);                        
-                }
-            }
-        }
-        
-    }
-
+   
     /**
      * Reader thread to obtain server messages.
      */
@@ -250,9 +232,10 @@ public class ClientController implements Communicator{
                                 break;
                             case SEND:
                             {
-                                User sender = (User) receivedMsg.getData(0);
-                                int msgNum = (int) receivedMsg.getData(1); //Para enviar confirmación en el futuro.
-                                Message msg = (Message) receivedMsg.getData(2);
+                                Message msg = (Message) receivedMsg.getData(0);
+                                User sender = msg.getSender();
+                                int msgNum = msg.getSeqNumber(); //Para enviar confirmación en el futuro.
+                                
                                 if(msg.isPublic()){
                                     msg.addHeader(sender.getName() + " dice: ");
                                 }
@@ -400,8 +383,8 @@ public class ClientController implements Communicator{
     }
     
     /**
-     * Sends a message to the server.
-     * @param msg Message to send.
+     * Sends a communication message to the server.
+     * @param msg CSMessage to send.
      */
     private void sendToServer(CSMessage msg){
         try{
@@ -409,14 +392,20 @@ public class ClientController implements Communicator{
         }
         catch(Exception ex){
             System.err.println("Error al enviar mensaje: "+ex.getMessage());
-        }
-                                
-    }
-    public void send(String message){
-        String buferEnvio = new Message(MessageKind.SEND, new String[]{Integer.toString(myId),message}).toMessage();
-        sendToServer(buferEnvio);
+        }                          
     }
     
+    /**
+     * Sends a user message to the server and other clients.
+     * @param message Message to send.
+     * @param isPrivate Indicates message scope. 
+     */
+    public void send(String message, boolean isPrivate){
+        Message sendMsg = new Message(message, myUser, sentMessages.size(), isPrivate);
+        sentMessages.add(sendMsg);
+        sendToServer(new CSMessage(MessageKind.SEND, new Object[]{sendMsg}));
+    }
+ /*   
     public synchronized void sendFile(File f){
         new Thread(new Runnable() {
 
@@ -445,38 +434,69 @@ public class ClientController implements Communicator{
         }).start();
         
     }
-
+*/
+    /**
+     * Changes client's private mode.
+     */
     public void changePrivate(){
-        String buferEnvio = new Message(MessageKind.CHANGEPRIVATE,new String[]{Integer.toString(myId)}).toMessage();
-        sendToServer(buferEnvio);
+        CSMessage sendMsg = new CSMessage(MessageKind.CHANGE_PRIV,new Object[]{});
+        sendToServer(sendMsg);
     }
     
+    /**
+     * Changes clients selection for a specific user.
+     * @param idChange User id to change.
+     */
     public void changeSelect(int idChange){
         selected[idChange]=!selected[idChange];
-        String buferEnvio = new Message(MessageKind.CHANGESELECT,new String[]{Integer.toString(myId),Integer.toString(idChange)}).toMessage();
-        sendToServer(buferEnvio);
+        CSMessage sendMsg = new CSMessage(MessageKind.CHANGE_SLCT,new Object[]{idChange});
+        sendToServer(sendMsg);
     }
     
+    /**
+     * Checks whether a user is selected.
+     * @param id User's id.
+     * @return True, if and only if given user is selected.
+     */
     public boolean isSelected(int id){
         return selected[id];
     }
     
+    /**
+     * Changes user state.
+     * @param state New state. 
+     */
     public void changeState(UserState state){
         myUser.changeState(state);
-        String buferEnvio = new Message(MessageKind.CHANGESTATE,new String[]{Integer.toString(myId),state.toString()}).toMessage();
-        sendToServer(buferEnvio);
+        CSMessage sendMsg = new CSMessage(MessageKind.CHANGE_STATE,new Object[]{state});
+        sendToServer(sendMsg);
     }
     
     public void stop() {
-        String buferEnvio = new Message(MessageKind.LOGOUT,new String[]{Integer.toString(myId)}).toMessage();
-        sendToServer(buferEnvio);
-        //Esperamos a que el servidor dé el visto bueno para salir correctamente.
-        //(hasta que el proceso lector no reciba un BYE del servidor.
+        CSMessage sendMsg = new CSMessage(MessageKind.LOGOUT,new Object[]{});
+        sendToServer(sendMsg);
+        clientState = ClientState.DISCONNECTING;
+        
         updater.stop();
         
-        while(running){}
-        view.enableMSNComponents(running);
+        //Activamos un temporizador para cerrar si no obtenemos respuesta del servidor (timeout)
+        Timer timeOutOff = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                clientState = ClientState.OFF;
+            }
+        });
+        timeOutOff.start();
+        
+        //Esperamos a que el servidor dé el visto bueno para salir correctamente.
+        //(hasta que el proceso lector no reciba un BYE del servidor.
+        //Si no hay respuesta el temporizador dará paso.
+        while(clientState != clientState.OFF){}
+        
+        timeOutOff.stop();
+        view.enableMSNComponents(false);
         myUser.changeState(UserState.OFF);
+        
         try {
             mySocket.close();
         } catch (Exception ex) {
@@ -486,11 +506,12 @@ public class ClientController implements Communicator{
     }
     
     public void sendAliveMessage(){
-        String buferEnvio = new Message(MessageKind.IMALIVE,new String[]{Integer.toString(myId)}).toMessage();
-        sendToServer(buferEnvio);
+        CSMessage sendMsg = new CSMessage(MessageKind.IMALIVE,new Object[]{});
+        sendToServer(sendMsg);
         this.myUser.update();
     }
-    
+ 
+    /*
     public void restart(){
         try{
             mySocket = new Socket(Client.host, Client.port);
@@ -534,36 +555,20 @@ public class ClientController implements Communicator{
             System.err.println("Error al restablecer la conexión: "+ex.getMessage());
             disconnect();
         }
-    }
+    }*/
     
     public void disconnect(){
-        running = false;
+        stop();
+        view.setMSN();
+        JOptionPane.showMessageDialog(this.view,"Te has desconectado.","Desconexión",JOptionPane.WARNING_MESSAGE);
+        /*
+        clientState = ClientState.OFF;
         if(myUser.getState() != UserState.OFF){
             this.myUser.changeState(UserState.OFF);
             this.view.setViewState(UserState.OFF);
             stop();
             JOptionPane.showMessageDialog(this.view,"Te has desconectado.","Desconexión",JOptionPane.WARNING_MESSAGE);
-        }
+        }*/
     }
     
-    // -- I/OPUT ACCESS -- //
-    public InputStream getInputStream() throws IOException{
-        return mySocket.getInputStream();
-    }
-    
-    public OutputStream getOutputStream() throws IOException{
-        return mySocket.getOutputStream();
-    }
-    
-    public OutputStreamWriter getOutputStreamWriter(){
-        return outputStream;
-    }
-    
-    public Scanner getInputScanner(){
-        return inputStream;
-    }
-    
-    public Socket getSocket(){
-        return mySocket;
-    }
 }

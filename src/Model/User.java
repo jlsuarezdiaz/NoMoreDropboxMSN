@@ -110,14 +110,7 @@ public class User {
     
     // ---------- GETTER METHODS ---------- //
     
-    /**
-     * Get User's id.
-     * @return User's id.
-     */
-    //public int getUid(){
-    //    return uid;
-    //}
-    
+       
     /**
      * Get User's name.
      * @return User's name.
@@ -173,33 +166,7 @@ public class User {
     }
     
     // ---------- PUBLIC METHODS ---------- //
-    
-    /**
-     * Find a new user id.
-     * @return Integer with the new user id.
-     * @throws Model.UserOverflowException
-     */
-    /*public int getNewId() throws UserOverflowException{
-        int rnd = rand.nextInt(MAX_USERS);
-        int fnum;
-        for(int i = 0; i < MAX_USERS; i++){
-            fnum = (i+rnd)%MAX_USERS;
-            File f = new File(getUserFile(fnum));
-            if(!f.exists() && fnum != 0){
-                return fnum;
-            }
-        }
-        throw new UserOverflowException("No users space available.");
-    }*/
-    
-    /**
-     * Updates user.
-     * @throws Model.UserOverflowException
-     */
-    //public void update(){
-    //    update(false);
-    //}
-    
+        
     /**
      * Updates user.
      * @param newid If it is true, user id is also updated.
@@ -226,86 +193,6 @@ public class User {
     }
     
     /**
-     * Erases the corresponding user file.
-     */
-    //public void erase(){
-    //    File f = new File("./"+getUserFile(uid));
-    //    f.setWritable(true);
-    //    f.delete();
-    //}
-    
-    /**
-     * Writes the corresponding user file and updates it.
-     */
-    //public void write(){
-    //    write(getUserFile(uid));
-    //}
-    
-    /**
-     * Writes to any file.
-     * @param file 
-     */
-    /*public void write(String file){
-        //FileWriter fw = null;
-        OutputStreamWriter fw = null;
-        try{
-            //fw = new FileWriter(file);
-            fw = new OutputStreamWriter(new FileOutputStream(file),"UTF-8");
-            fw.write(Integer.toString(uid) + IO_LIM);
-            fw.write(name + IO_LIM);
-            fw.write(state.toString() + IO_LIM);
-            fw.write(df.format(current_time) + IO_LIM);
-        }
-        catch(IOException ex){
-        }
-        finally{
-            try{
-                if(fw != null) fw.close();
-            }
-            catch(IOException ex){}
-        }
-    }*/
-    
-    /**
-     * Reads the corresponding user file and updates the user.
-     */
-    //public void read(){
-    //    read(getUserFile(uid));
-    //}
-    
-    /**
-     * Reads an user from any file.
-     * @param file 
-     */
-    /*public void read(String file){
-        Scanner scan = null;
-        File f = new File(file);
-        
-        if(f.exists()){
-            try {
-                scan = new Scanner(f,"UTF-8");
-                scan.useDelimiter(IO_LIM);
-                uid = Integer.parseInt(scan.next());
-                name = scan.next();
-                state = UserState.valueOf(scan.next());
-                current_time = df.parse(scan.next());
-            } catch (FileNotFoundException | ParseException | NoSuchElementException ex) {
-                name = "";
-                state = UserState.OFF;        
-             //   Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-             //   Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            finally{
-                if(scan != null) scan.close();
-            }
-        }
-        else{
-            name = "";
-            state = UserState.OFF;
-        }
-    }*/
-    
-    /**
      * Gets a string with user's info.
      * @return String with user's info.
      */
@@ -315,7 +202,4 @@ public class User {
                     + state.toString() + "\nLast update: " + df.format(current_time);
     }
     
-    public String toMessage(){
-        return this.name+ServerData.US+this.state.toString()+ServerData.US+df.format(current_time)+ServerData.RS;
-    }
 }

@@ -43,6 +43,16 @@ public class MSNSocket {
     }
     
     /**
+     * Constructor
+     * @param socket Java socket. 
+     */
+    public MSNSocket(Socket socket) throws IOException{
+        this.socket = socket;
+        this.oos = new ObjectOutputStream(socket.getOutputStream());
+        this.ois = new ObjectInputStream(socket.getInputStream());
+    }
+    
+    /**
      * Sends a message over the socket.
      * @param msg CSMessage to send.
      * @throws IOException
@@ -60,5 +70,12 @@ public class MSNSocket {
      */
     public synchronized CSMessage readMessage() throws IOException, ClassNotFoundException{
         return (CSMessage)this.ois.readObject();
+    }
+    
+    /**
+     * Closes the socket.
+     */
+    public void close() throws IOException{
+        socket.close();
     }
 }

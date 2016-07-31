@@ -116,15 +116,15 @@ public class CSMessage {
      * 
      * USERS: userList (User[])
      * 
-     * SEND: sender (User), msgNum (int), msg (Message)
+     * SEND: msg (Message)
      * 
      * FILE:
      * 
      * IMALIVE:
      * 
-     * CHANGE_PRIV: mode (boolean)
+     * CHANGE_PRIV: 
      * 
-     * CHANGE_SLCT: user (int), mode (boolean)
+     * CHANGE_SLCT: user (int)
      * 
      * CHANGE_STATE: state (userState)
      * 

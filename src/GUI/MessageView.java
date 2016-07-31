@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package GUI;
 
+import Model.MSNDateFormat;
 import Model.Message;
 import java.awt.Color;
 
@@ -68,8 +69,9 @@ public class MessageView extends javax.swing.JPanel {
     public void setMessage(Message m){
         select(false);
         this.messageModel = m;
-        this.labelText.setText(messageModel.getMessageData()[0]);
-        this.labelDate.setText((m.getDate() == null)?"--ERR_DATE--":Message.getDateFormat().format(messageModel.getDate()));
+        this.labelText.setText(messageModel.getText());
+        this.labelDate.setText((m.getDate() == null)?"--ERR_DATE--":
+            MSNDateFormat.getInstance().format(messageModel.getDate()));
         
         //jScrollPane2.validate();
         //JScrollBar vertical = jScrollPane2.getVerticalScrollBar();

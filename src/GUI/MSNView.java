@@ -6,6 +6,7 @@
 package GUI;
 
 import Model.ClientController;
+import Model.MSNDateFormat;
 import Model.Message;
 import Model.MessageKind;
 import Model.User;
@@ -128,7 +129,7 @@ public class MSNView extends javax.swing.JFrame {
      * Action of sending a message.
      */
     private void performSend(){
-        msn_ctrl.send(TextMessage.getText());
+        msn_ctrl.send(TextMessage.getText(),BtPrivate.isSelected());
     }
     
     /**
@@ -321,7 +322,7 @@ public class MSNView extends javax.swing.JFrame {
         //MessageScroll.getVerticalScrollBar().addAdjustmentListener((AdjustmentEvent e) -> {
         //    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
         //});
-        desktopNotify(msg.getMessageData()[0]);
+        desktopNotify(msg.getText());
     }
     
     /**
@@ -504,7 +505,7 @@ public class MSNView extends javax.swing.JFrame {
         try{
             fw = new FileWriter(address);
             for(Message msg : msgs){
-                fw.write("["+Message.getDateFormat().format(msg.getDate())+"] "+msg.getMessageData()[0]+"\n");
+                fw.write("["+MSNDateFormat.getInstance().format(msg.getDate())+"] "+msg.getText()+"\n");
             }
             
         }
@@ -844,10 +845,10 @@ public class MSNView extends javax.swing.JFrame {
             msn_ctrl.stop();
         }
         else if(newState != UserState.OFF){
-            msn_ctrl.restart();
+            //msn_ctrl.restart();
             msn_ctrl.changeState(newState);
         }
-    
+    /* !!!!!! REVISAR !!!!!!! */
 
     }//GEN-LAST:event_ComboUserStateActionPerformed
     
@@ -919,7 +920,7 @@ public class MSNView extends javax.swing.JFrame {
         //}
         //else{
             for(Message m : msgs){
-               clipboard += "["+Message.getDateFormat().format(m.getDate())+"] "+m.getMessageData()[0]+"\n";
+               clipboard += "["+MSNDateFormat.getInstance().format(m.getDate())+"] "+m.getText()+"\n";
             }
         //}
         enableCopyButtons();
@@ -997,7 +998,7 @@ public class MSNView extends javax.swing.JFrame {
         if(returnVal == JFileChooser.APPROVE_OPTION){
             File[] files = fc.getSelectedFiles();
             for(File f : files){
-                msn_ctrl.sendFile(f);
+                //msn_ctrl.sendFile(f);
             }
         }
     }//GEN-LAST:event_BtSendFileActionPerformed

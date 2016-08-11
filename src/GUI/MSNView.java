@@ -258,6 +258,7 @@ public class MSNView extends javax.swing.JFrame {
             setPrivate(false);
         }
         this.BtPrivate.setEnabled(enabled);
+        this.BtSendFile.setEnabled(enabled);
         setValidText(enabled && !TextMessage.getText().trim().isEmpty());
         //this.ComboUserState.setEnabled(enabled);
         this.MessagePanel.setEnabled(enabled);

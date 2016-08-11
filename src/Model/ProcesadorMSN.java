@@ -52,8 +52,9 @@ class ProcesadorMSN extends Thread{
             this.serviceSocket = new MSNSocket(socketServicio);
         }
         catch(Exception ex){
-            System.err.println("Error al crear el flujo E/S: "+ex.getMessage());
+            Tracer.getInstance().trace(ex);
         }
+        this.serverData=s;
         this.running=true;
     }
     
@@ -66,21 +67,21 @@ class ProcesadorMSN extends Thread{
         int remoteId = -1;
         
         //Nueva conexión. Enviamos el mensaje de saludo.
-        System.out.println("["+MSNDateFormat.getInstance().format(new Date())+"] New connection.");
+        Tracer.getInstance().trace(2,"New connection.");
         try {
             serviceSocket.writeMessage(new CSMessage(MessageKind.HELO,null));
         } catch (IOException ex) {
-            System.err.println("Error al saludar al cliente.");
+            Tracer.getInstance().trace(ex);
         }
              
         do{
             try {
-                System.out.println("Thread "+remoteId+" waiting for message...");
+                Tracer.getInstance().trace(2,"Thread "+remoteId+" waiting for message...");
                                 
                 receivedData = serviceSocket.readMessage();
                 sendData = null;
                 
-                System.out.println("["+receivedData.getDate()+"] "+receivedData.getMessageKind()+" received.");
+                Tracer.getInstance().trace(receivedData);
                 
                 switch(receivedData.getMessageKind()){
                     case LOGIN: 
@@ -163,7 +164,7 @@ class ProcesadorMSN extends Thread{
                     case NOP:
                         break;
                     default:
-                        System.out.println("["+MSNDateFormat.getInstance().format(receivedData.getDate())+"] Error: Wrong command received: "+ receivedData.getMessageKind());
+                        Tracer.getInstance().trace(new Exception("Error: Wrong command received: "+ receivedData.getMessageKind()));
                         sendData=new CSMessage(MessageKind.ERR_BADREQUEST,new Object[]{"El código de mensaje es incorrecto."});
                         break;
                 };
@@ -173,12 +174,13 @@ class ProcesadorMSN extends Thread{
                 }
 
             } catch (Exception ex) {
-                //System.err.println("Error al obtener los flujos de entrada/salida.");      
-                System.err.println("Error en el procesador:\n"+ ex.getMessage());
+                Tracer.getInstance().trace(ex);
+                if(serviceSocket.isClosed()){
+                    kill();
+                }
             }
         }while(running);
-        System.out.println("["+MSNDateFormat.getInstance().format(new Date())+"] Connection ended.");
-
+        Tracer.getInstance().trace(1, "Connection ended.");
     }
     
     //Añadimos el método run() de la clase Thread, con la función de procesamiento.

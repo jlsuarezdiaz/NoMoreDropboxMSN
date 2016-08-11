@@ -32,7 +32,7 @@ public class ServerData {
     /**
      * Users list in the messenger.
      */
-    private User[] user_list = new User[MAX_USERS];
+    private volatile User[] user_list = new User[MAX_USERS];
     
     /**
      * Processor threads for each client.
@@ -155,7 +155,7 @@ public class ServerData {
                    processors[i].getSocket().writeMessage(message);
                 }
                 catch(Exception ex){
-                    System.err.println("Error al enviar mensaje: "+ex.getMessage());
+                    Tracer.getInstance().trace(ex);
                 }
             }
         }
@@ -171,7 +171,7 @@ public class ServerData {
             processors[id].getSocket().writeMessage(message);
         }
         catch(Exception ex){
-            System.err.println("Error al enviar el mensaje: "+ex.getMessage());
+            Tracer.getInstance().trace(ex);
         }
     }
     
@@ -187,7 +187,7 @@ public class ServerData {
                     sendTo(j, msg);
                 }
                 catch(Exception ex){
-                    System.err.println("Error al enviar el mensaje: "+ex.getMessage()); 
+                    Tracer.getInstance().trace(ex); 
                 }
             }
         }
@@ -200,7 +200,7 @@ public class ServerData {
      * @pre message must be a SEND message.
      */
     public void sendMessageToAll(int id,CSMessage message){
-        int seqNumber = ((Message)message.getData(1)).getSeqNumber();
+        int seqNumber = ((Message)message.getData(0)).getSeqNumber();
         for(int i = 0; i < MAX_USERS; i++){
             if(processors[i] != null){
                 try{
@@ -208,7 +208,7 @@ public class ServerData {
                    sendTo(id,new CSMessage(MessageKind.OK_SENT,new Object[]{user_list[i],seqNumber}));
                 }
                 catch(Exception ex){
-                    System.err.println("Error al enviar mensaje: "+ex.getMessage());
+                    Tracer.getInstance().trace(ex);
                 }
             }
         }
@@ -221,7 +221,7 @@ public class ServerData {
      * @pre message must be a SEND message.
      */
     public void sendMessageToSelected(int id, CSMessage message){
-        int seqNumber = ((Message)message.getData(1)).getSeqNumber();
+        int seqNumber = ((Message)message.getData(0)).getSeqNumber();
         for(int j = 0; j < MAX_USERS; j++){
             if(selectedUsers[id][j] && processors[j] != null){
                 try{
@@ -229,7 +229,7 @@ public class ServerData {
                     sendTo(id,new CSMessage(MessageKind.OK_SENT,new Object[]{user_list[j],seqNumber}));
                 }
                 catch(Exception ex){
-                    System.err.println("Error al enviar el mensaje: "+ex.getMessage()); 
+                    Tracer.getInstance().trace(ex);
                 }
             }
         }
@@ -242,7 +242,7 @@ public class ServerData {
      * @pre cmsg must be a SEND message.
      */
     public synchronized void sendMessage(int id, CSMessage cmsg){
-        Message msg = ((Message)cmsg.getData(1));
+        Message msg = ((Message)cmsg.getData(0));
         if(msg.isPublic()){
             sendMessageToAll(id, cmsg);
         }
@@ -353,7 +353,7 @@ public class ServerData {
     public synchronized void checkUsers(){
         Date d = new Date();
         String name = "";
-        System.out.println("["+MSNDateFormat.getInstance().format(d)+"] USER CHECKING Started.");
+        Tracer.getInstance().trace(1, "USER CHECKING started.");
         for(int i = 0; i < MAX_USERS; i++){
             User u = user_list[i];
             if(u.getDate() != null && (getTimeDifference(d,u.getDate()) > MAX_INACTIVE_PERIOD 
@@ -361,7 +361,7 @@ public class ServerData {
                 //Si un usuario no ha dado señales de vida en cierto tiempo lo eliminamos.
                 sendTo(i, new CSMessage(MessageKind.DISC, null));
                 removeUser(i);
-                System.out.println("- USER "+ Integer.toString(i) +" KILLED.");
+                Tracer.getInstance().trace(2,"- USER "+ Integer.toString(i) +" KILLED.");
             }
         }
     }

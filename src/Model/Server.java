@@ -230,11 +230,13 @@ public class Server {
 	ServerSocket serverSocket = null;
         Socket socketServicio = null;
         
+        Tracer.getInstance().setDebugLevel(2);
+        
         try {
             // Abrimos el socket en modo pasivo, escuchando el en puerto indicado por "port"
             //////////////////////////////////////////////////
             serverSocket=new ServerSocket(port);
-            System.out.println("["+MSNDateFormat.getInstance().format(new Date())+"] Server started.");
+            Tracer.getInstance().trace(1,"Server started.");
             Server.serverSocket = serverSocket;
             //////////////////////////////////////////////////
             //Abrimos la hebra lectora del servidor, que permite la interactividad.
@@ -248,7 +250,7 @@ public class Server {
                         socketServicio=serverSocket.accept();
                 }
                 catch(IOException e){
-                        System.err.println("Error: no se pudo aceptar la conexión solicitada");
+                    Tracer.getInstance().trace(e);
                 }
                 //////////////////////////////////////////////////
 
@@ -256,7 +258,7 @@ public class Server {
                 procesador.start();
             }while(true);
         } catch (IOException e) {
-                    System.err.println("Error al escuchar en el puerto "+port+"\n"+e.getMessage());
+            Tracer.getInstance().trace(e);
         }
     }
 }

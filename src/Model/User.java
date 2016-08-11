@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -26,7 +27,7 @@ import java.util.logging.Logger;
  * Class user. It contains information related to a user's state in the MSN.
  * @author Juan Luis
  */
-public class User {
+public class User implements Serializable{
     /**
      * User's id.
      */

@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,7 +23,7 @@ import java.util.Scanner;
  * Class message. It represents the messages that users send in MSN.
  * @author Juan Luis
  */
-public class Message {
+public class Message implements Serializable{
         
     /**
      * Message contents.
@@ -161,5 +162,16 @@ public class Message {
      */
     public boolean isEmpty(){
         return messageData.trim().isEmpty();
+    }
+    
+    @Override
+    public String toString(){
+        return
+                "SENDER: "+sender.toString()+
+                "\nPUBLIC: "+Boolean.toString(isPublic)+
+                "\nSTATUS: "+status+
+                "\nNUM: "+Integer.toString(seqNumber)+
+                "\nDATE: "+MSNDateFormat.getInstance().format(date)+
+                "\nDATA:\n\t"+messageData;
     }
 }

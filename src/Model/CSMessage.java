@@ -5,13 +5,14 @@
  */
 package Model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * A class to manage and encapsulate communication messages between server and clients.
  * @author Juan Luis
  */
-public class CSMessage {
+public class CSMessage implements Serializable{
     
     /**
      * Message kind.

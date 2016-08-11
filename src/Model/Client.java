@@ -87,6 +87,7 @@ public class Client {
      */
     public static void main(String[] args){
         MSNSocket msnSocket = null;
+        Tracer.getInstance().setDebugLevel(3);
         
         //Creamos un MSNSocket que se conecte a host y a port.
         try{
@@ -95,7 +96,7 @@ public class Client {
         }
         catch(IOException ex){
             JOptionPane.showMessageDialog(null, "Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage() , "Error de conexión",JOptionPane.ERROR_MESSAGE);
-            System.err.println("Error: no se pudo establecer una conexión con el servidor.\n"+ex.getMessage());
+            Tracer.getInstance().trace(ex);
         }
         
     }

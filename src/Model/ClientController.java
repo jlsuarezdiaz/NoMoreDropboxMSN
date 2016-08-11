@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import static java.lang.Thread.sleep;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,6 +83,11 @@ public class ClientController{
     private ArrayList<Message> sentMessages;
     
     /**
+     * Timer for time out disconnections.
+     */
+    //private Timer timeOutOff;
+    
+    /**
      * Constructor.
      * @param userSocket MSNSocket to be used by the client.
      */
@@ -105,9 +111,18 @@ public class ClientController{
         for(int i = 0; i < User.getMaxUsers(); i++){
             selected[i]=false;
         }
-        //this.updater.start();
+        
         this.clientControllerInstance = this;
         sentMessages = new ArrayList();
+        
+    /*    timeOutOff = new Timer(3000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                System.out.println("Timeoutoff timer activated.");
+                clientState = ClientState.OFF;
+                System.out.println("Timeoutoff timer ended.");
+            }
+        });*/
     }
     
 
@@ -133,7 +148,7 @@ public class ClientController{
         new Thread(new Runnable() {
         @Override
         public void run() {
-            System.out.println("Reader thread started.");
+            Tracer.getInstance().trace(1, "Reader thread started.");
             CSMessage receivedMsg = null;
             CSMessage sendMessage = null;
             do{
@@ -141,16 +156,16 @@ public class ClientController{
                     receivedMsg = mySocket.readMessage();
                 }
                 catch(Exception ex){
-                    System.err.println("Error leyendo mensaje: "+ex.getMessage());
+                    Tracer.getInstance().trace(ex);
                     receivedMsg = new CSMessage(MessageKind.NOP, null);
+                    if(mySocket.isClosed()){
+                        disconnect();
+                    }
                 }
                 sendMessage = null;
-            /*    while(!inputStream.hasNext()){}
-                buferRecepcion = inputStream.next();
-                //System.out.println(buferRecepcion);//!!!!!!!!!!!//
-                info = buferRecepcion.split(String.valueOf(ServerData.GS));
-                System.out.println("["+info[1]+"] "+info[0]+" received.");*/
-
+            
+                Tracer.getInstance().trace(receivedMsg);
+                
                 switch(clientState){
                     case START: //Actions for state START
                     {
@@ -162,8 +177,8 @@ public class ClientController{
                                 
                             case OK_VERSION: //Switch to LOGIN state.
                                 clientState = ClientState.LOGIN;
-                                if(myUser==null) startLogin();
-                                sendMessage = new CSMessage(MessageKind.LOGIN, new Object[]{myUser.getName()});
+                                startLogin();
+                                //sendMessage = new CSMessage(MessageKind.LOGIN, new Object[]{myUser.getName()});
                                 break;
                             case WARN_NOTUPATED:
                                 break;
@@ -173,7 +188,7 @@ public class ClientController{
                             case NOP:
                                 break;
                             default:
-                                System.err.println("Error: bad request: "+receivedMsg.getMessageKind());
+                                Tracer.getInstance().trace(new Exception("Bad request: "+receivedMsg.getMessageKind()));
                                 break;
                         }
                     }
@@ -186,7 +201,9 @@ public class ClientController{
                                 clientControllerInstance.myId = (int) receivedMsg.getData(0);
                                 view.setMSN(clientControllerInstance);
                                 view.showView();
+                                view.enableMSNComponents(true);
                                 clientState = ClientState.ONLINE;
+                                clientControllerInstance.updater.start();
                                 break;
                                 
                             case ERR_USEROVERFLOW:
@@ -199,7 +216,7 @@ public class ClientController{
                             case NOP:
                                 break;
                             default:
-                                System.err.println("Error: bad request: "+receivedMsg.getMessageKind());
+                                Tracer.getInstance().trace(new Exception("Bad request: "+receivedMsg.getMessageKind()));
                                 break;
                         }
                     }
@@ -236,14 +253,21 @@ public class ClientController{
                                 User sender = msg.getSender();
                                 int msgNum = msg.getSeqNumber(); //Para enviar confirmación en el futuro.
                                 
-                                if(msg.isPublic()){
-                                    msg.addHeader(sender.getName() + " dice: ");
-                                }
-                                else{
-                                    msg.addHeader("Mensaje privado de "+sender.getName()+": ");
+                                if(msg.getSender()!=null){
+                                    if(msg.isPublic()){
+                                        msg.addHeader(sender.getName() + " dice: ");
+                                    }
+                                    else{
+                                        msg.addHeader("Mensaje privado de "+sender.getName()+": ");
+                                    }
                                 }
                                 view.pushMessage(msg);
                                 view.messageSound();
+                            }
+                                break;
+                            case USERS:
+                            {
+                                clientControllerInstance.userList = (User[])receivedMsg.getData(0);
                             }
                                 break;
                             case FILE:
@@ -252,11 +276,12 @@ public class ClientController{
                             case NOP:
                                 break;
                             default:
-                                System.err.println("Error: bad request: "+receivedMsg.getMessageKind());
+                                Tracer.getInstance().trace(new Exception("Bad request: "+receivedMsg.getMessageKind()));
                                 break;
                         }
                         view.setMSN();
                     }
+                        break;
                     case DISCONNECTING:
                     {
                         switch(receivedMsg.getMessageKind()){
@@ -264,12 +289,11 @@ public class ClientController{
                                 clientState = ClientState.OFF;
                                 break;
                             case NOP:
-                                break;
                             default:
-                                System.err.println("Error: bad request: "+receivedMsg.getMessageKind());
                                 break;
                         }
                     }
+                        break;
                     case UPDATE:
                     {
                         switch(receivedMsg.getMessageKind()){
@@ -285,10 +309,11 @@ public class ClientController{
                             case NOP:
                                 break;
                             default:
-                                System.err.println("Error: bad request: "+receivedMsg.getMessageKind());
+                                Tracer.getInstance().trace(new Exception("Bad request: "+receivedMsg.getMessageKind()));
                                 break;
                         }
                     }
+                        break;
                     default:
                         break;
                 }
@@ -375,11 +400,13 @@ public class ClientController{
      * Performs login.
      */
     private void startLogin(){
-        MSNIntro intro = new MSNIntro(view,true);
-        String userName=null;              
-        userName = intro.getUser();
-        this.myUser = new User(userName);
-        sendToServer(new CSMessage(MessageKind.LOGIN, new Object[]{userName}));
+        if(this.myUser==null){
+            MSNIntro intro = new MSNIntro(view,true);
+            String userName=null;              
+            userName = intro.getUser();
+            this.myUser = new User(userName);
+        }
+        sendToServer(new CSMessage(MessageKind.LOGIN, new Object[]{myUser.getName()}));
     }
     
     /**
@@ -391,7 +418,7 @@ public class ClientController{
             mySocket.writeMessage(msg);
         }
         catch(Exception ex){
-            System.err.println("Error al enviar mensaje: "+ex.getMessage());
+            Tracer.getInstance().trace(ex);
         }                          
     }
     
@@ -401,7 +428,7 @@ public class ClientController{
      * @param isPrivate Indicates message scope. 
      */
     public void send(String message, boolean isPrivate){
-        Message sendMsg = new Message(message, myUser, sentMessages.size(), isPrivate);
+        Message sendMsg = new Message(message, myUser, sentMessages.size(), !isPrivate);
         sentMessages.add(sendMsg);
         sendToServer(new CSMessage(MessageKind.SEND, new Object[]{sendMsg}));
     }
@@ -467,12 +494,31 @@ public class ClientController{
      * @param state New state. 
      */
     public void changeState(UserState state){
+        if(clientState==ClientState.OFF){
+            try {
+                mySocket = new MSNSocket(Client.host, Client.port);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+                disconnect();
+                return;
+            }
+            clientState=ClientState.START;
+            reader();
+            
+            while(clientState!=ClientState.ONLINE){
+                try {
+                    sleep(100);
+                } catch (InterruptedException ex) {}
+            }
+        }
+        
         myUser.changeState(state);
         CSMessage sendMsg = new CSMessage(MessageKind.CHANGE_STATE,new Object[]{state});
         sendToServer(sendMsg);
     }
     
     public void stop() {
+        if(clientState == ClientState.OFF) return;
         CSMessage sendMsg = new CSMessage(MessageKind.LOGOUT,new Object[]{});
         sendToServer(sendMsg);
         clientState = ClientState.DISCONNECTING;
@@ -480,27 +526,31 @@ public class ClientController{
         updater.stop();
         
         //Activamos un temporizador para cerrar si no obtenemos respuesta del servidor (timeout)
-        Timer timeOutOff = new Timer(3000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                clientState = ClientState.OFF;
-            }
-        });
-        timeOutOff.start();
+        
+        
+        //timeOutOff.start();
+        
         
         //Esperamos a que el servidor dé el visto bueno para salir correctamente.
         //(hasta que el proceso lector no reciba un BYE del servidor.
         //Si no hay respuesta el temporizador dará paso.
-        while(clientState != clientState.OFF){}
+        int timeOutCount = 0;
+        while(clientState != clientState.OFF && timeOutCount < 300){
+            try {
+                sleep(10);
+                timeOutCount++;
+            } catch (InterruptedException ex) {}
+        }
         
-        timeOutOff.stop();
+        clientState = ClientState.OFF;
+        //timeOutOff.stop();
         view.enableMSNComponents(false);
         myUser.changeState(UserState.OFF);
         
         try {
             mySocket.close();
         } catch (Exception ex) {
-            System.err.println("Error al cerrar la comunicación: "+ex.getMessage());
+            Tracer.getInstance().trace(ex);
         }
            
     }

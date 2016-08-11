@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Date;
 
 /**
  * A class to manage app sockets.
@@ -29,6 +30,16 @@ public class MSNSocket {
      * ObjectInputStream.
      */
     private ObjectInputStream ois;
+    
+    /**
+     * Input mutex.
+     */
+    private final Object inMutex = new Object();
+    
+    /**
+     * Output mutex.
+     */
+    private final Object outMutex = new Object();
     
     /**
      * Constructor.
@@ -57,9 +68,15 @@ public class MSNSocket {
      * @param msg CSMessage to send.
      * @throws IOException
      */
-    public synchronized void writeMessage(CSMessage msg) throws IOException{
-        this.oos.writeObject(msg);
-        this.oos.flush();
+    public void writeMessage(CSMessage msg) throws IOException{
+        synchronized(outMutex){
+            //System.out.println("["+new Date() + "] Sending "+msg.getMessageKind()+"...");
+            this.oos.reset();
+            this.oos.writeObject(msg);
+            //this.oos.writeUnshared(msg);
+            this.oos.flush();
+            //System.out.println("["+new Date() + "] Sent "+msg.getMessageKind()+"...");
+        }
     }
     
     /**
@@ -68,8 +85,13 @@ public class MSNSocket {
      * @throws IOException
      * @throws ClassNotFoundException 
      */
-    public synchronized CSMessage readMessage() throws IOException, ClassNotFoundException{
-        return (CSMessage)this.ois.readObject();
+    public CSMessage readMessage() throws IOException, ClassNotFoundException{
+        CSMessage read;
+        synchronized(inMutex){
+            read =  (CSMessage)this.ois.readObject();
+            //read =  (CSMessage)this.ois.readUnshared();
+        }
+        return read;
     }
     
     /**
@@ -77,5 +99,9 @@ public class MSNSocket {
      */
     public void close() throws IOException{
         socket.close();
+    }
+    
+    public boolean isClosed(){
+        return socket.isClosed();
     }
 }

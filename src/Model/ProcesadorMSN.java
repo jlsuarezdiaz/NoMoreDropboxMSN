@@ -175,7 +175,7 @@ class ProcesadorMSN extends Thread{
 
             } catch (Exception ex) {
                 Tracer.getInstance().trace(ex);
-                if(serviceSocket.isClosed()){
+                if(!serviceSocket.isConnectionAlive()){
                     kill();
                 }
             }

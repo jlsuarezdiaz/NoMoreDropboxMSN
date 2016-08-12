@@ -125,7 +125,8 @@ public class Server {
                                     User[] ul = serverData.getUserList();
                                     for(int i = 0; i < User.getMaxUsers(); i++){
                                         if(ul[i]!= null && ul[i].validState()){
-                                            System.out.println("\tID "+i+"\tNAME = "+ul[i].getName()+ "\tSTATE = "+ul[i].getState());
+                                            //System.out.println("\tID "+i+"\tNAME = "+ul[i].getName()+ "\tSTATE = "+ul[i].getState());
+                                            System.out.println("\n- ID "+i+"\n"+ ul[i].toString());
                                         }
                                     }
                                     break;
@@ -187,6 +188,14 @@ public class Server {
                                     break;
                                 case "check":
                                     serverData.checkUsers();
+                                    break;
+                                case "debug":
+                                    if(args.length<2) System.out.println(Tracer.debugInfo);
+                                    else try{
+                                        Tracer.getInstance().setDebugLevel(Integer.valueOf(args[1]));
+                                    }
+                                    catch(Exception ex){ System.out.println(Tracer.debugInfo);}
+                                    System.out.println("El nivel de depuración actual es "+Tracer.getInstance().getDebugLevel());
                                     break;
                                 case "":
                                     break;

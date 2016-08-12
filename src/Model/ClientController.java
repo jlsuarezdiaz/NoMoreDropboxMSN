@@ -158,7 +158,7 @@ public class ClientController{
                 catch(Exception ex){
                     Tracer.getInstance().trace(ex);
                     receivedMsg = new CSMessage(MessageKind.NOP, null);
-                    if(mySocket.isClosed()){
+                    if(!mySocket.isConnectionAlive()){
                         disconnect();
                     }
                 }
@@ -273,6 +273,15 @@ public class ClientController{
                             case FILE:
                                 
                                 break;
+                            case DISC:
+                                disconnect();
+                                break;
+                            case KILL:
+                                if(receivedMsg.getData() != null && receivedMsg.getData().length > 0){
+                                    JOptionPane.showMessageDialog(view, receivedMsg.getData(0),"ERROR FATAL",JOptionPane.ERROR_MESSAGE);
+                                }
+                                System.exit(0);
+                                break; 
                             case NOP:
                                 break;
                             default:

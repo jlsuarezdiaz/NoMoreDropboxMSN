@@ -135,10 +135,10 @@ public class Tracer {
                 break;
             case 2:
             case 3:
-                System.out.println(getDateStringFormat(date)+msg.getMessageKind()+ " received.");
+                System.out.println(getDateStringFormat(date)+msg.getMessageCode()+" "+msg.getMessageKind()+ " received.");
                 break;
             case 4:
-                System.out.println(getDateStringFormat(date)+msg.getMessageKind()+ " received.");
+                System.out.println(getDateStringFormat(date)+msg.getMessageCode()+" "+msg.getMessageKind()+ " received.");
                 System.out.println("Date: "+getDateStringFormat(msg.getDate()));
                 for(Object o : msg.getData()){
                     if(o != null)System.out.println(o.getClass().toString()+": "+o.toString());
@@ -146,8 +146,9 @@ public class Tracer {
                 }
                 break;
             case 5:
-                System.out.println(getDateStringFormat(date)+msg.getMessageKind()+ " received.");
+                System.out.println(getDateStringFormat(date)+msg.getMessageCode()+" "+msg.getMessageKind()+ " received.");
                 System.out.println("Date: "+getDateStringFormat(msg.getDate()));
+                if(msg.getData() != null)
                 for(Object o : msg.getData()){
                     if(o != null){
                         if(o.getClass().isArray()){
@@ -162,6 +163,7 @@ public class Tracer {
                     }
                     else System.out.println("--NULL ARGUMENT--");
                 }
+                else System.out.println("--NULL ARGUMENTS--");
                 break;
             default:
                 System.err.println("Incorrect debug level. Please choose a correct one.");

@@ -167,7 +167,7 @@ public class Message implements Serializable{
     @Override
     public String toString(){
         return
-                "SENDER: "+sender.toString()+
+                "SENDER: "+((sender==null)?"No More Dropbox MSN Server":sender.toString())+
                 "\nPUBLIC: "+Boolean.toString(isPublic)+
                 "\nSTATUS: "+status+
                 "\nNUM: "+Integer.toString(seqNumber)+

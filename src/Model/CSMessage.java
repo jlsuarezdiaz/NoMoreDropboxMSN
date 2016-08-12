@@ -84,6 +84,10 @@ public class CSMessage implements Serializable{
         return args[i];
     }
     
+    public int getMessageCode(){
+        return messageKind.getMessageCode();
+    }
+    
     /** 
      * DATA FOR EACH KIND OF MESSAGE ([?] = optional)
      * 

@@ -199,8 +199,9 @@ public class User implements Serializable{
      */
     @Override
     public String toString(){
-        return  "\nName: " + name + "\nState: "
-                    + state.toString() + "\nLast update: " + df.format(current_time);
+        return  validState()?"\nName: " + name + "\nState: "
+                    + state.toString() + "\nLast update: " + df.format(current_time)
+                :"\nOFF USER";
     }
     
 }

@@ -101,7 +101,44 @@ public class MSNSocket {
         socket.close();
     }
     
+    /**
+     * Checks if the socket is closed.
+     * @return True, when socket has been closed.
+     */
     public boolean isClosed(){
         return socket.isClosed();
+    }
+    
+    /**
+     * Checks if the connection with remote host is still alive.
+     * This method tries to send three times a NOP message.
+     * If any of the tries is succesful, the connection will be alive.
+     * If every try fails, the connection will be closed.
+     * @return True, if the connection is alive. Else, false.
+     */
+    public boolean isConnectionAlive(){
+        Tracer.getInstance().trace(2, "Connection checking started.");
+        boolean isAlive = false;
+        CSMessage tryMsg = new CSMessage(MessageKind.NOP, null);
+        final int numTries = 3;
+        
+        for(int i = 0; i < numTries && !isAlive; i++){
+            try{
+                writeMessage(tryMsg);
+                isAlive = true;
+                Tracer.getInstance().trace(2,"Attempt "+Integer.toString(i)+" succeded.");
+            }
+            catch(Exception ex){
+                Tracer.getInstance().trace(ex);
+                Tracer.getInstance().trace(2,"Attempt "+Integer.toString(i)+" failed.");
+            }
+        }
+        if(!isAlive){
+            try{
+                socket.close();
+            }
+            catch(Exception ex){}
+        }
+        return isAlive;
     }
 }

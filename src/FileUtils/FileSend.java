@@ -29,7 +29,7 @@ public class FileSend {
     public static void sendFile(Communicator c, byte[] data, String name, LoadableView view, String sender){
         //System.out.println("SEND FILE STARTED");
         Socket s = c.getSocket();
-        String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length),sender}).toMessage();
+        //String msgcab = new Message(MessageKind.FILE,new String[]{name,Integer.toString(data.length),sender}).toMessage();
         OutputStream os = null;
         OutputStreamWriter o = null;
         
@@ -38,7 +38,7 @@ public class FileSend {
             o = c.getOutputStreamWriter();
 
             System.out.println("Se enviarán "+data.length+" B por "+sender);
-            o.write(msgcab);
+            //o.write(msgcab);
             o.flush();
             
             // Esperar confirmación

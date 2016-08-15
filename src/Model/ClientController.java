@@ -6,9 +6,12 @@ package Model;
 import GUI.FileView;
 import GUI.MSNIntro;
 import GUI.MSNView;
+import GUI.MessageView;
+import GUI.MessageableView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -80,7 +83,17 @@ public class ClientController{
     /**
      * List of sent messages.
      */
-    private ArrayList<Message> sentMessages;
+    private ArrayList<MessageableView> sentMessages;
+    
+    /**
+     * Files' count.
+     */
+    private int fileCount = 0;
+    
+    /**
+     * File registry.
+     */
+    private FileRegistry fileRegistry;
     
     /**
      * Timer for time out disconnections.
@@ -114,6 +127,8 @@ public class ClientController{
         
         this.clientControllerInstance = this;
         sentMessages = new ArrayList();
+        
+        this.fileCount = 0;
         
     /*    timeOutOff = new Timer(3000, new ActionListener() {
             @Override
@@ -227,7 +242,7 @@ public class ClientController{
                         switch(receivedMsg.getMessageKind()){
                             case OK_SENT:
                             {
-                                User msgReceiver = (User) receivedMsg.getData(0);
+                            /*    User msgReceiver = (User) receivedMsg.getData(0);
                                 int msgNum = (int) receivedMsg.getData(1);
                                 Message sent = sentMessages.get(msgNum);
                                 if(!sent.isPublic()){
@@ -235,7 +250,7 @@ public class ClientController{
                                     sent.addHeader("Enviaste a "+msgReceiver.getName()+": ");
                                     view.pushMessage(sent);
                                     view.messageSound();
-                                }
+                                }*/
                             }
                                 break;
                             case OK_PRIV:
@@ -261,7 +276,9 @@ public class ClientController{
                                         msg.addHeader("Mensaje privado de "+sender.getName()+": ");
                                     }
                                 }
-                                view.pushMessage(msg);
+                                MessageView mv = new MessageView();
+                                mv.setMessage(msg);
+                                view.pushMessage(mv);
                                 view.messageSound();
                             }
                                 break;
@@ -270,8 +287,32 @@ public class ClientController{
                                 clientControllerInstance.userList = (User[])receivedMsg.getData(0);
                             }
                                 break;
-                            case FILE:
+                            case SEND_FILE:
+                            {
+                                int usrId = (int)receivedMsg.getData(0);
+                                int fileId = (int)receivedMsg.getData(1);
+                                String name = (String)receivedMsg.getData(2);
+                                long size = (long)receivedMsg.getData(3);
+                                Message msg = (Message)receivedMsg.getData(4);
                                 
+                                FileView fv = new FileView();
+                                fv.setMessage(msg);
+                                view.pushMessage(fv);
+                                view.messageSound();
+                                
+                                fileRegistry.addNewFile(usrId, fileId, name, size,fv);
+                            }
+                                break;
+                            case FILE:
+                            {
+                                int usrId = (int)receivedMsg.getData(0);
+                                int fileId = (int)receivedMsg.getData(1);
+                                long iniByte = (long)receivedMsg.getData(2);
+                                int offset = (int)receivedMsg.getData(3);
+                                byte[] data = (byte[])receivedMsg.getData(4);
+                                
+                                fileRegistry.addData(usrId, fileId, data, iniByte, offset);
+                            }
                                 break;
                             case DISC:
                                 disconnect();
@@ -436,10 +477,63 @@ public class ClientController{
      * @param message Message to send.
      * @param isPrivate Indicates message scope. 
      */
-    public void send(String message, boolean isPrivate){
+    public synchronized void send(String message, boolean isPrivate){
         Message sendMsg = new Message(message, myUser, sentMessages.size(), !isPrivate);
-        sentMessages.add(sendMsg);
+        MessageView mv = new MessageView();
+        mv.setMessage(sendMsg);
+        view.pushMessage(mv);
+        sentMessages.add(mv);
         sendToServer(new CSMessage(MessageKind.SEND, new Object[]{sendMsg}));
+    }
+    
+    public void sendFile(File f, String msg, boolean isPrivate){
+        Tracer.getInstance().trace(2,"Sending file started.");
+        
+        FileView fv = new FileView();
+        fv.setFile(f);
+        fv.setView(f.getName(), 0, f.length(), "B", "Subiendo...");
+        
+        int fileId = sendFileHeader(f,msg, isPrivate,fv);
+        int userId = myId;
+        
+        
+        
+        final int fileLengthSize = 1200;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    FileInputStream fis = new FileInputStream(f);
+                    int bytesRead = 0;
+                    long totalRead = 0;
+                    byte[] fileData = new byte[fileLengthSize];
+                    do{
+                        bytesRead = fis.read(fileData);
+                        CSMessage fileMsg = new CSMessage(MessageKind.FILE,
+                           new Object[]{userId,fileId,totalRead,bytesRead,fileData});
+                        totalRead+=bytesRead;
+                        fv.updateView(totalRead, f.length());
+                        Tracer.getInstance().trace(2,Long.toString(totalRead)+" B sent.");
+                    }while(bytesRead >= 0);
+                }
+                catch(Exception ex){
+                    Tracer.getInstance().trace(ex);
+                }
+            }
+        });
+        
+    }
+    
+    private synchronized int sendFileHeader(File f,String msg, boolean isPrivate,FileView fv){
+        int fileId = fileCount;
+        Message sendMsg = new Message(msg,myUser, sentMessages.size(),!isPrivate);
+        fv.setMessage(sendMsg);
+        view.pushMessage(fv);
+        sentMessages.add(fv);
+        sendToServer(new CSMessage(MessageKind.SEND_FILE,new Object[]{
+            myId,fileId,f.getName(),f.length(),sendMsg}));
+        fileCount++;
+        return fileId;
     }
  /*   
     public synchronized void sendFile(File f){

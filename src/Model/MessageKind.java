@@ -45,6 +45,8 @@ public enum MessageKind {
     CHANGE_SLCT        (305),
     CHANGE_STATE       (306),
     
+    SEND_FILE          (311),
+    
     //4xx - Error messages
     ERR                (400),
     ERR_BADREQUEST     (401),

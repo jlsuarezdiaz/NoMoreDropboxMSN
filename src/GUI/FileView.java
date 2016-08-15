@@ -6,6 +6,9 @@
 package GUI;
 
 import FileUtils.FileSend;
+import Model.MSNDateFormat;
+import Model.Message;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,13 +23,29 @@ import javax.swing.JOptionPane;
  *
  * @author Juan Luis
  */
-public class FileView extends javax.swing.JPanel implements LoadableView{
+public class FileView extends MessageableView implements LoadableView{
     private String fileLoading;
-    private int curr;
-    private int tot;
+    private long curr;
+    private long tot;
     private String unit;
     private String action;
     File f;
+    
+    private Message messageModel;
+    
+    private boolean isSelected;
+    
+    /**
+     * Private method to set background according to selection.
+     */
+    private void setBackground(){
+        if(isSelected){
+            this.setBackground(new Color(0x00FFFF));
+        }
+        else{
+            this.setBackground(new Color(0xCCCCCC));
+        }
+    }
     
     /**
      * Creates new form FileView
@@ -252,12 +271,36 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
     // End of variables declaration//GEN-END:variables
 
     @Override
+    public Message getMessage() {
+        return messageModel;
+    }
+
+    @Override
+    public void setMessage(Message m) {
+        this.messageModel = m;
+        this.senderLab.setText(m.getSender().getName());
+        this.dateLab.setText(MSNDateFormat.getInstance().format(m.getDate()));
+    }
+
+    @Override
     public void hideView() {
         this.downloadPb.setVisible(false);
     }
 
     @Override
-    public void setView(String fileLoading, int curr, int tot, String unit, String action) {
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    @Override
+    public void select(boolean selection) {
+        this.isSelected = selection;
+        setBackground();
+        repaint();
+    }
+
+    @Override
+    public void setView(String fileLoading, long curr, long tot, String unit, String action) {
         this.fileLoading = fileLoading;
         this.curr =  curr;
         this.tot = tot;
@@ -266,10 +309,10 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
         
         this.fileLab.setText(fileLoading+ (curr<tot?" ("+action+")":""));
         this.downloadPb.setVisible(true);
-        this.downloadPb.setMaximum(tot);
+        this.downloadPb.setMaximum((int)tot);
         this.downloadPb.setMinimum(0);
-        this.downloadPb.setValue(curr);
-        this.downloadPb.setToolTipText(Integer.toString(curr)+" / "+Integer.toString(tot)+" "+unit);
+        this.downloadPb.setValue((int)curr);
+        this.downloadPb.setToolTipText(Long.toString(curr)+" / "+Long.toString(tot)+" "+unit);
         
         try{
             String extension = fileLoading.substring(fileLoading.lastIndexOf(".")+1);
@@ -282,10 +325,7 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
         this.revalidate();
     }
     
-    public void setMetaView(String date, String sender){
-        this.dateLab.setText(date);
-        this.senderLab.setText(sender);
-    }
+    
 
     @Override
     public void showView() {
@@ -293,7 +333,7 @@ public class FileView extends javax.swing.JPanel implements LoadableView{
     }
 
     @Override
-    public void updateView(int curr, int tot) {
+    public void updateView(long curr, long tot) {
         setView(fileLoading,curr,tot,unit,action);
     }
     

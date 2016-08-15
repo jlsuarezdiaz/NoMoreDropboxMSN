@@ -11,8 +11,8 @@ package GUI;
  */
 public class LoadingView extends javax.swing.JDialog implements LoadableView {
     private String fileLoading;
-    private int curr;
-    private int tot;
+    private long curr;
+    private long tot;
     private String unit;
     private String  action;
     
@@ -35,23 +35,23 @@ public class LoadingView extends javax.swing.JDialog implements LoadableView {
     }
     
     @Override
-    public void setView(String fileLoading, int curr, int tot, String unit, String action){
+    public void setView(String fileLoading, long curr, long tot, String unit, String action){
         this.fileLoading = fileLoading;
         this.curr = curr;
         this.tot = tot;
         this.unit = unit;
         this.action = action;
         this.loadingLab.setText(action + " " + fileLoading + "...");
-        this.quantityLab.setText(Integer.toString(curr) + " / " + Integer.toString(tot) + " " + unit);
-        this.loadPb.setMaximum(tot);
+        this.quantityLab.setText(Long.toString(curr) + " / " + Long.toString(tot) + " " + unit);
+        this.loadPb.setMaximum((int)tot);
         this.loadPb.setMinimum(0);
-        this.loadPb.setValue(curr);
+        this.loadPb.setValue((int)curr);
         this.repaint();
         this.revalidate();
     }
     
     @Override
-    public void updateView(int curr, int tot) {
+    public void updateView(long curr, long tot) {
         setView(this.fileLoading,curr,tot,this.unit,this.action);
     }
     

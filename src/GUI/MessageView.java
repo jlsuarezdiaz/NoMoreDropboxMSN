@@ -14,7 +14,7 @@ import java.awt.Color;
  * A GUI for class Message.
  * @author Juan Luis
  */
-public class MessageView extends javax.swing.JPanel {
+public class MessageView extends MessageableView{
 
     /**
      * Message.

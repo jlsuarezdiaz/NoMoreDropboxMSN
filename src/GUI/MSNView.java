@@ -295,11 +295,10 @@ public class MSNView extends javax.swing.JFrame {
      * Adds a new message to message panel.
      * @param msg Message to add.
      */
-    public void pushMessage(Message msg){
+    public void pushMessage(MessageableView msgview){
         boolean isOnBottom = MessageScroll.getVerticalScrollBar().getValue() == 
                 MessageScroll.getVerticalScrollBar().getMaximum()-MessageScroll.getVerticalScrollBar().getVisibleAmount();
-        MessageView msgview = new MessageView();
-        msgview.setMessage(msg);
+        
         msgview.setVisible(true);
         msgview.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
@@ -323,7 +322,7 @@ public class MSNView extends javax.swing.JFrame {
         //MessageScroll.getVerticalScrollBar().addAdjustmentListener((AdjustmentEvent e) -> {
         //    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
         //});
-        desktopNotify(msg.getText());
+        desktopNotify(msgview.getMessage().getText());
     }
     
     /**
@@ -999,7 +998,7 @@ public class MSNView extends javax.swing.JFrame {
         if(returnVal == JFileChooser.APPROVE_OPTION){
             File[] files = fc.getSelectedFiles();
             for(File f : files){
-                //msn_ctrl.sendFile(f);
+                msn_ctrl.sendFile(f,"",BtPrivate.isSelected());
             }
         }
     }//GEN-LAST:event_BtSendFileActionPerformed

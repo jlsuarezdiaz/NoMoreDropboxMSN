@@ -14,7 +14,7 @@ public interface LoadableView {
     
     public void hideView();
     
-    public void setView(String fileLoading, int curr, int tot, String unit, String action);
+    public void setView(String fileLoading, long curr, long tot, String unit, String action);
 
-    public void updateView(int curr, int tot);
+    public void updateView(long curr, long tot);
 }

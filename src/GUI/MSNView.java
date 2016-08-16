@@ -322,12 +322,19 @@ public class MSNView extends javax.swing.JFrame {
         //MessageScroll.getVerticalScrollBar().addAdjustmentListener((AdjustmentEvent e) -> {
         //    e.getAdjustable().setValue(e.getAdjustable().getMaximum());
         //});
-        desktopNotify(msgview.getMessage().getText());
+        Message msg = msgview.getMessage();
+        String deskNotifMsg =  msg.getText();
+        if(msgview instanceof FileView){
+            deskNotifMsg = msg.getSender().getName()+(msg.isPublic()?": ":" (PRIVADO): ")+
+                    " [ARCHIVO] "+((FileView)msgview).getFileLoading() + "\n" + deskNotifMsg;
+        }
+        desktopNotify(deskNotifMsg);
     }
     
     /**
      * Push a file to the view.
      * @param fv FileView to push.
+     * @deprecated
      */
     public void pushFile(FileView fv) {
         boolean isOnBottom = MessageScroll.getVerticalScrollBar().getValue() == 

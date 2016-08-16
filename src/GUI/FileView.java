@@ -8,11 +8,14 @@ package GUI;
 import FileUtils.FileSend;
 import Model.MSNDateFormat;
 import Model.Message;
+import Model.Tracer;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -164,7 +167,7 @@ public class FileView extends MessageableView implements LoadableView{
         int returnVal = fc.showSaveDialog(this);
         FileOutputStream fw = null;
         if(returnVal == JFileChooser.APPROVE_OPTION){
-            try{
+        /*    try{
                 byte[] data = FileSend.loadFile(f.getAbsolutePath());
                 File save = new File(fc.getSelectedFile().getAbsolutePath());
                 fw = new FileOutputStream(save);
@@ -183,6 +186,11 @@ public class FileView extends MessageableView implements LoadableView{
                     fw.close();
                 }
                 catch(Exception ex){}
+            }*/
+            try {
+                Files.copy(f.toPath(), fc.getSelectedFile().toPath(), REPLACE_EXISTING);
+            } catch (IOException ex) {
+                Tracer.getInstance().trace(ex);
             }
         }
     }//GEN-LAST:event_downloadBtActionPerformed
@@ -278,7 +286,7 @@ public class FileView extends MessageableView implements LoadableView{
     @Override
     public void setMessage(Message m) {
         this.messageModel = m;
-        this.senderLab.setText(m.getSender().getName());
+        this.senderLab.setText(m.getSender().getName()+(m.isPublic()?"": " [PRIVADO]"));
         this.dateLab.setText(MSNDateFormat.getInstance().format(m.getDate()));
     }
 

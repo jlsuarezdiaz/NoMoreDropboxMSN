@@ -123,7 +123,9 @@ public class CSMessage implements Serializable{
      * 
      * SEND: msg (Message)
      * 
-     * FILE:
+     * SEND_FILE: msg (Message), userId (int), fileId (int), fileName (String), fileLength (long)
+     * 
+     * FILE: userId (int), fileId (int), initialByte (long), offset (int), data (byte [])
      * 
      * IMALIVE:
      * 

@@ -5,6 +5,7 @@ package Model;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -70,7 +71,7 @@ class ProcesadorMSN extends Thread{
         Tracer.getInstance().trace(2,"New connection.");
         try {
             serviceSocket.writeMessage(new CSMessage(MessageKind.HELO,null));
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Tracer.getInstance().trace(ex);
         }
              
@@ -88,42 +89,44 @@ class ProcesadorMSN extends Thread{
                         int id = serverData.addUser((String)receivedData.getData(0),this);    //Necesita Mutex
                         remoteId=id;
                         break;
-                    case SEND:  //Fecha,ID, mensaje
+                    case SEND: 
+                    case SEND_FILE:
                         serverData.sendMessage(remoteId,receivedData);                      
                         break;
-                    case CHANGE_PRIV: //Fecha,ID
+                    case CHANGE_PRIV: 
                         boolean state1 = serverData.changePrivate(remoteId);
                         sendData=new CSMessage(MessageKind.OK_PRIV,new Object[]{state1});
                         break;
 
-                    case CHANGE_SLCT: //Fecha,ID, UserChanged
+                    case CHANGE_SLCT:
                         int chgId = (int)receivedData.getData(0);
                         boolean state2 = serverData.changeSelect(remoteId, chgId);
                         sendData=new CSMessage(MessageKind.OK_SLCT,new Object[]{chgId,state2});
                         break;
-                    case CHANGE_STATE: //Fecha,ID,State
+                    case CHANGE_STATE:
                         UserState usrState = serverData.changeState(remoteId,(UserState)receivedData.getData(0));
                         sendData=new CSMessage(MessageKind.OK_STATE,new Object[]{usrState});
                         break;
                     case LOGOUT:   
-                        serverData.removeUser(Integer.valueOf(remoteId));
+                        if(remoteId >= 0) serverData.removeUser(Integer.valueOf(remoteId));
+                        else kill();
                         break;
 
                     case IMALIVE: 
                         serverData.updateUser(remoteId);
                         break; 
                         
-                    case VERSION: //Fecha, Version
+                    case VERSION:
                         double clientVersion = (double) receivedData.getData(0);
                         if(clientVersion < Data.Txt.LAST_COMPATIBLE){
-                            //UPDATE, Info, OptYes, OptNo, canContinue
+                            //ERR_NEDDUPDATE, Info, OptYes, OptNo
                             sendData=new CSMessage(MessageKind.ERR_NEEDUPDATE,
                                 new Object[]{"Necesita actualizar NoMoreDropboxMSN a su versión más reciente para poder seguir utilizándolo.",
                                 "Actualizar","Salir",}
                             );
                         }
                         else if(clientVersion < Data.Txt.VERSION_CODE){
-                            //UPDATE, Info, OptYes, OptNo, canContinue
+                            //WARN_NOTUPDATED, Info, OptYes, OptNo, canContinue
                             sendData=new CSMessage(MessageKind.WARN_NOTUPATED,
                                 new Object[]{"Hay una versión más reciente disponible de NoMoreDropboxMSN. ¿Desea actualizar?",
                                 "Actualizar","No actualizar"}
@@ -132,6 +135,12 @@ class ProcesadorMSN extends Thread{
                         else{
                             sendData=new CSMessage(MessageKind.OK_VERSION,null);
                         }
+                        break;
+                    case FILE:
+                        serverData.sendToAll(receivedData);
+                        break;
+                    case UPDATE_DOWNLOAD:
+                        sendJarFile();
                         break;
                      /*
                     case UPDATE:
@@ -181,6 +190,47 @@ class ProcesadorMSN extends Thread{
             }
         }while(running);
         Tracer.getInstance().trace(1, "Connection ended.");
+    }
+
+    /**
+     * Method to send a program update to the client.
+     */
+    private void sendJarFile() {
+        try{
+            File f = new File("./NoMoreDropboxMSN.jar");
+            
+            if(f.exists()){
+                serviceSocket.writeMessage(new CSMessage(MessageKind.SEND_FILE, new Object[]{f.length()}));
+                
+                final int fileLengthSize = 50000;
+                FileInputStream fis = new FileInputStream(f);
+                int bytesRead = 0;
+                long totalRead = 0;
+                byte[] fileData = new byte[fileLengthSize];
+                do{
+                    bytesRead = fis.read(fileData);
+                    CSMessage fileMsg = new CSMessage(MessageKind.FILE,
+                       new Object[]{-1,-1,totalRead,bytesRead,fileData});
+                    totalRead+=bytesRead;
+                    if(bytesRead > 0){
+                        serviceSocket.writeMessage(fileMsg);
+                    }
+                    Tracer.getInstance().trace(2,Long.toString(totalRead)+" B sent.");
+                }while(bytesRead >= 0);
+                
+            }
+            else{
+                serviceSocket.writeMessage(new CSMessage(MessageKind.ERR_JARNOTFOUND,
+                    new Object[]{"La actualización no está disponible para ser enviada."}));
+            }
+        }
+        catch(Exception ex){
+            Tracer.getInstance().trace(ex);
+            try{
+                serviceSocket.writeMessage(new CSMessage(MessageKind.ERR, new Object[]{ex.getMessage()}));
+            }
+            catch(Exception exx){ Tracer.getInstance().trace(exx); }
+        }
     }
     
     //Añadimos el método run() de la clase Thread, con la función de procesamiento.

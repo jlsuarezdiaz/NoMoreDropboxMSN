@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,7 +90,10 @@ class FileStruct{
             if(fileView != null){
                 //Set view.
                 fileView.updateView(currentLength, totalLength);
-                if(isFullFile()) fileView.setFile(f);
+                if(isFullFile()){
+                    fileView.setFile(f);
+                    fileView.hideView();
+                }
             }
         }
         catch(Exception ex){
@@ -122,10 +126,15 @@ public class FileRegistry {
     Map<Integer,FileStruct> [] registry;
     
     public FileRegistry(){
-        this.registry = (Map<Integer, FileStruct>[]) new ArrayList<>(User.getMaxUsers()).toArray();
-        for(Map<Integer,FileStruct> m : registry){
-            m = new ConcurrentHashMap<>();
+        //this.registry = (Map<Integer, FileStruct>[]) new ArrayList<>(User.getMaxUsers()).toArray();
+        ArrayList<Map<Integer,FileStruct>> a = new ArrayList<Map<Integer,FileStruct>>(User.getMaxUsers());
+        for(int i = 0; i < User.getMaxUsers(); i++){
+            a.add(new ConcurrentHashMap<>());
         }
+        Object[] o = a.toArray();
+               
+        this.registry = Arrays.copyOf(o, o.length, Map[].class);
+        
     }
     
     public void addNewFile(int userId, int fileId, String name, long length, FileView view){
@@ -133,6 +142,7 @@ public class FileRegistry {
     }
     
     public void addData(int userId, int fileId, byte[] data, long iniByte, int offset){
-        registry[userId].get(fileId).writeData(data, iniByte, offset);
+        if(registry[userId].containsKey(fileId)) registry[userId].get(fileId).writeData(data, iniByte, offset);
+        else Tracer.getInstance().trace(2, "FILE ignored");
     }
 }

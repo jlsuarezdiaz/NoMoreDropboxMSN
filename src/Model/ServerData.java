@@ -214,11 +214,32 @@ public class ServerData {
         }
     }
     
+        /**
+     * Send a user message to all users, except the given by its user id.
+     * @param id  Sender's id
+     * @param message CSMessage to send.
+     * @pre message must be a SEND message.
+     */
+    public void sendMessageToAllExcept(int id,CSMessage message){
+        int seqNumber = ((Message)message.getData(0)).getSeqNumber();
+        for(int i = 0; i < MAX_USERS; i++){
+            if(processors[i] != null && i != id){
+                try{
+                   sendTo(i,message);
+                   sendTo(id,new CSMessage(MessageKind.OK_SENT,new Object[]{user_list[i],seqNumber}));
+                }
+                catch(Exception ex){
+                    Tracer.getInstance().trace(ex);
+                }
+            }
+        }
+    }
+    
     /**
      * Sends a user message to the selected users.
      * @param id Sender's id.
      * @param message CSMessage to send.
-     * @pre message must be a SEND message.
+     * @pre message must be a SEND* message.
      */
     public void sendMessageToSelected(int id, CSMessage message){
         int seqNumber = ((Message)message.getData(0)).getSeqNumber();
@@ -244,7 +265,7 @@ public class ServerData {
     public synchronized void sendMessage(int id, CSMessage cmsg){
         Message msg = ((Message)cmsg.getData(0));
         if(msg.isPublic()){
-            sendMessageToAll(id, cmsg);
+            sendMessageToAllExcept(id, cmsg);
         }
         else{
             sendMessageToSelected(id, cmsg);

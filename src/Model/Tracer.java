@@ -129,6 +129,7 @@ public class Tracer {
     
     private void record(Date date, CSMessage msg){
         msgRecord.add(new Pair<>(date, msg));
+        if(msgRecord.size() > 100) msgRecord.remove(0);
         switch(debugLevel){
             case 0:
             case 1:
@@ -140,6 +141,7 @@ public class Tracer {
             case 4:
                 System.out.println(getDateStringFormat(date)+msg.getMessageCode()+" "+msg.getMessageKind()+ " received.");
                 System.out.println("Date: "+getDateStringFormat(msg.getDate()));
+                if(msg.getData()!=null)
                 for(Object o : msg.getData()){
                     if(o != null)System.out.println(o.getClass().toString()+": "+o.toString());
                     else System.out.println("--NULL ARGUMENT--");
@@ -175,6 +177,7 @@ public class Tracer {
     
     private void record(Date date, Exception ex){
         errorRecord.add(new Pair<>(date,ex));
+        if(errorRecord.size() > 100) errorRecord.remove(0);
         switch(debugLevel){
             case 0:
                 break;
@@ -196,6 +199,7 @@ public class Tracer {
     
     private void record(Date date, int levelFor, String action){
         actionsRecord.add(new Pair<>(date,action));
+        if(actionsRecord.size() > 100) actionsRecord.remove(0);
         if(debugLevel >= levelFor){
             System.out.println(getDateStringFormat(date)+action);
         }

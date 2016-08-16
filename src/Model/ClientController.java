@@ -4,6 +4,7 @@
 package Model;
 
 import GUI.FileView;
+import GUI.LoadingView;
 import GUI.MSNIntro;
 import GUI.MSNView;
 import GUI.MessageView;
@@ -12,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -95,6 +98,34 @@ public class ClientController{
      */
     private FileRegistry fileRegistry;
     
+    // ------- FOLLOWING ATRIBUTES ARE ONLY USEFUL IN UPDATE STATE ------- //
+    /**
+     * File for updating the program.
+     */
+    private File updateFile;
+    
+    /**
+     * File output stream for updating file.
+     */
+    private FileOutputStream fosUpdate;
+    
+    /**
+     * Updating dialog.
+     */
+    private LoadingView updateView;
+    
+    /**
+     * Current length for updating file.
+     */
+    private long currentLengthUpdate;
+    
+    /**
+     * Total length for updating file.
+     */
+    private long totalLengthUpdate;
+    
+    // ---------------------------------------------- //
+    
     /**
      * Timer for time out disconnections.
      */
@@ -111,7 +142,7 @@ public class ClientController{
         this.mySocket = userSocket;
         this.clientState = ClientState.START;
         
-        reader();//Iniciamos la hebra lectora.
+        
         //view.enableMSNComponents(running);
         
         this.updater = new Timer(UPDATE_TIME, new ActionListener() {
@@ -130,14 +161,17 @@ public class ClientController{
         
         this.fileCount = 0;
         
-    /*    timeOutOff = new Timer(3000, new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                System.out.println("Timeoutoff timer activated.");
-                clientState = ClientState.OFF;
-                System.out.println("Timeoutoff timer ended.");
-            }
-        });*/
+        this.fileRegistry = new FileRegistry();
+        
+        this.updateFile = null;
+        this.fosUpdate = null;
+        this.updateView = null;
+        this.currentLengthUpdate = 0;
+        this.totalLengthUpdate = 0;
+        
+        reader();//Iniciamos la hebra lectora.
+        
+        
     }
     
 
@@ -167,16 +201,9 @@ public class ClientController{
             CSMessage receivedMsg = null;
             CSMessage sendMessage = null;
             do{
-                try{
-                    receivedMsg = mySocket.readMessage();
-                }
-                catch(Exception ex){
-                    Tracer.getInstance().trace(ex);
-                    receivedMsg = new CSMessage(MessageKind.NOP, null);
-                    if(!mySocket.isConnectionAlive()){
-                        disconnect();
-                    }
-                }
+            try{
+                receivedMsg = mySocket.readMessage();
+                
                 sendMessage = null;
             
                 Tracer.getInstance().trace(receivedMsg);
@@ -196,9 +223,32 @@ public class ClientController{
                                 //sendMessage = new CSMessage(MessageKind.LOGIN, new Object[]{myUser.getName()});
                                 break;
                             case WARN_NOTUPATED:
+                            {
+                                int chosenOption = JOptionPane.showOptionDialog(null, receivedMsg.getData(0), 
+                                        receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(),
+                                        JOptionPane.YES_NO_OPTION,JOptionPane.INFORMATION_MESSAGE,null,
+                                        new Object[]{receivedMsg.getData(0),receivedMsg.getData(1)},null);
+                                
+                                if(chosenOption == 0){
+                                    clientState = ClientState.UPDATE;
+                                    startUpdating();
+                                }
+                                else{
+                                    clientState = ClientState.LOGIN;
+                                    startLogin();
+                                }
+                            
+                            }
                                 break;
                                 
                             case ERR_NEEDUPDATE:
+                            {
+                                int chosenOption = JOptionPane.showOptionDialog(null, receivedMsg.getData(0), 
+                                        receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(),
+                                        JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE,null,
+                                        new Object[]{receivedMsg.getData(0),receivedMsg.getData(1)},null);
+                                
+                            }
                                 break;
                             case NOP:
                                 break;
@@ -289,14 +339,15 @@ public class ClientController{
                                 break;
                             case SEND_FILE:
                             {
-                                int usrId = (int)receivedMsg.getData(0);
-                                int fileId = (int)receivedMsg.getData(1);
-                                String name = (String)receivedMsg.getData(2);
-                                long size = (long)receivedMsg.getData(3);
-                                Message msg = (Message)receivedMsg.getData(4);
+                                int usrId = (int)receivedMsg.getData(1);
+                                int fileId = (int)receivedMsg.getData(2);
+                                String name = (String)receivedMsg.getData(3);
+                                long size = (long)receivedMsg.getData(4);
+                                Message msg = (Message)receivedMsg.getData(0);
                                 
                                 FileView fv = new FileView();
                                 fv.setMessage(msg);
+                                fileRegistry.addNewFile(usrId, fileId, name, size,fv);
                                 view.pushMessage(fv);
                                 view.messageSound();
                                 
@@ -347,15 +398,51 @@ public class ClientController{
                     case UPDATE:
                     {
                         switch(receivedMsg.getMessageKind()){
+                            case SEND_FILE:
+                                try {
+                                   totalLengthUpdate = (long)receivedMsg.getData(0);
+                                    
+                                } catch (Exception ex) {
+                                    Tracer.getInstance().trace(ex);
+                                    JOptionPane.showMessageDialog(null, "Error al escribir en el archivo: "+ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+                                    stop();
+                                    System.exit(0);
+                                }
+                                break;
                             case FILE:
-                                
+                                try {
+                                    long iniByte = (long) receivedMsg.getData(2);
+                                    int offset = (int) receivedMsg.getData(3);
+                                    byte[] data = (byte[])receivedMsg.getData(4);
+                                    if(iniByte != currentLengthUpdate){
+                                        throw new Exception("Invalid file sequence: "+Long.toString(currentLengthUpdate)+ " vs "+Long.toString(iniByte));
+                                    }
+                                    fosUpdate.write(data,0,offset);
+                                    currentLengthUpdate+=offset;
+
+                                    
+                                    //Set view.
+                                    updateView.updateView(currentLengthUpdate, totalLengthUpdate);
+                                    if(currentLengthUpdate == totalLengthUpdate){
+                                        updateView.hideView();
+                                        stop();
+                                        System.exit(0);
+                                    }
+                                    
+                                } catch (Exception ex) {
+                                    Tracer.getInstance().trace(ex);
+                                    JOptionPane.showMessageDialog(null, "Error al escribir en el archivo: "+ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+                                    stop();
+                                    System.exit(0);
+                                }
                                 break;
                             case ERR:
-                                
+                                JOptionPane.showMessageDialog(null, "ERROR: "+receivedMsg.getData(0), 
+                                        receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(), JOptionPane.ERROR_MESSAGE);
                                 break;
                             case ERR_JARNOTFOUND:
-                                
-                                break;
+                                JOptionPane.showMessageDialog(null, "ERROR: "+receivedMsg.getData(0), 
+                                        receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(), JOptionPane.ERROR_MESSAGE);                                break;
                             case NOP:
                                 break;
                             default:
@@ -438,7 +525,14 @@ public class ClientController{
                         break;
 
                 }*/
-
+            }
+            catch(Exception ex){
+                Tracer.getInstance().trace(ex);
+                receivedMsg = new CSMessage(MessageKind.NOP, null);
+                if(!mySocket.isConnectionAlive()){
+                    disconnect();
+                }
+            }
             }while(clientState != ClientState.OFF);
 
         }
@@ -457,6 +551,25 @@ public class ClientController{
             this.myUser = new User(userName);
         }
         sendToServer(new CSMessage(MessageKind.LOGIN, new Object[]{myUser.getName()}));
+    }
+    
+    /**
+     * Performs updating.
+     */
+    private void startUpdating(){
+        try {
+            this.updateFile = new File("./NoMoreDropboxMSN.jar");
+            this.fosUpdate = new FileOutputStream(updateFile);
+            this.updateView= new LoadingView(null, false);
+            updateView.setView("./NoMoreDropboxMSN.jar", 0, 0, "B", "Descargando archivo:");
+            sendToServer(new CSMessage(MessageKind.UPDATE_DOWNLOAD, null));
+        } catch (Exception ex) {
+            Tracer.getInstance().trace(ex);
+            JOptionPane.showMessageDialog(null, "Error al escribir en el archivo: "+ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            stop();
+            System.exit(0);
+        }
+        
     }
     
     /**
@@ -483,22 +596,26 @@ public class ClientController{
         mv.setMessage(sendMsg);
         view.pushMessage(mv);
         sentMessages.add(mv);
-        sendToServer(new CSMessage(MessageKind.SEND, new Object[]{sendMsg}));
+        
+        sendToServer(new CSMessage(MessageKind.SEND, new Object[]{sendMsg}));                    
+        
+        sendMsg.addHeader("Tú"+((isPrivate)?" (PRIVADO): ":": "));
+        mv.setMessage(sendMsg);
     }
     
     public void sendFile(File f, String msg, boolean isPrivate){
         Tracer.getInstance().trace(2,"Sending file started.");
         
         FileView fv = new FileView();
-        fv.setFile(f);
         fv.setView(f.getName(), 0, f.length(), "B", "Subiendo...");
+        fv.setFile(f);
         
         int fileId = sendFileHeader(f,msg, isPrivate,fv);
         int userId = myId;
         
         
         
-        final int fileLengthSize = 1200;
+        final int fileLengthSize = 50000;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -512,15 +629,20 @@ public class ClientController{
                         CSMessage fileMsg = new CSMessage(MessageKind.FILE,
                            new Object[]{userId,fileId,totalRead,bytesRead,fileData});
                         totalRead+=bytesRead;
-                        fv.updateView(totalRead, f.length());
+                        if(bytesRead > 0){
+                            fv.updateView(totalRead, f.length());
+                            sendToServer(fileMsg);
+                        }
+                        
                         Tracer.getInstance().trace(2,Long.toString(totalRead)+" B sent.");
                     }while(bytesRead >= 0);
+                    fv.hideView();
                 }
                 catch(Exception ex){
                     Tracer.getInstance().trace(ex);
                 }
             }
-        });
+        }).start();
         
     }
     
@@ -531,7 +653,7 @@ public class ClientController{
         view.pushMessage(fv);
         sentMessages.add(fv);
         sendToServer(new CSMessage(MessageKind.SEND_FILE,new Object[]{
-            myId,fileId,f.getName(),f.length(),sendMsg}));
+            sendMsg,myId,fileId,f.getName(),f.length()}));
         fileCount++;
         return fileId;
     }
@@ -645,7 +767,10 @@ public class ClientController{
             } catch (InterruptedException ex) {}
         }
         
-        clientState = ClientState.OFF;
+        if(clientState != ClientState.OFF){
+            clientState = ClientState.OFF;
+            Tracer.getInstance().trace(2,"No response from server. Forcing disconnection.");
+        }
         //timeOutOff.stop();
         view.enableMSNComponents(false);
         myUser.changeState(UserState.OFF);

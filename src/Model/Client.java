@@ -87,7 +87,7 @@ public class Client {
      */
     public static void main(String[] args){
         MSNSocket msnSocket = null;
-        Tracer.getInstance().setDebugLevel(3);
+        Tracer.getInstance().setDebugLevel(0);
         
         //Creamos un MSNSocket que se conecte a host y a port.
         try{

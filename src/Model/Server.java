@@ -60,7 +60,13 @@ public class Server {
             +"\n\tPORT\t- Indica el puerto por el que está escuchando el servidor."
             +"\n\tADDRESS\t- Muestra información sobre las direcciones."
             +"\n\tCMD\t- Ejecuta comandos del sistema."
-            +"\n\tDISC\t- Fuerza la desconexión del usuario con el ID indicado.";
+            +"\n\tDISC\t- Fuerza la desconexión del usuario con el ID indicado."
+            +"\n\tKILL\t- Fuerza el cierre automático del cliente con el ID indicado. Opcionalmente admite mensaje de error."
+            +"\n\tWHATSMYIP o WMIP\t- Obtiene la dirección IP pública del servidor."
+            +"\n\tVERSIONS\t- Muestra información sobre las versiones."
+            +"\n\tCHECK\t- Ejecuta instantáneamente el proceso de USER CHECKING."
+            +"\n\tDEBUG\t- Permite mostrar y/o seleccionar el nivel de depuración del servidor."
+            ;
     
     private static void reader(ServerData serverData){
         new Thread(new Runnable() {

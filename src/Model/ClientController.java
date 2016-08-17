@@ -21,6 +21,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import static java.lang.Thread.sleep;
 import java.net.Socket;
+import java.nio.file.Files;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
@@ -227,7 +229,7 @@ public class ClientController{
                                 int chosenOption = JOptionPane.showOptionDialog(null, receivedMsg.getData(0), 
                                         receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(),
                                         JOptionPane.YES_NO_OPTION,JOptionPane.INFORMATION_MESSAGE,null,
-                                        new Object[]{receivedMsg.getData(0),receivedMsg.getData(1)},null);
+                                        new Object[]{receivedMsg.getData(1),receivedMsg.getData(2)},null);
                                 
                                 if(chosenOption == 0){
                                     clientState = ClientState.UPDATE;
@@ -246,7 +248,16 @@ public class ClientController{
                                 int chosenOption = JOptionPane.showOptionDialog(null, receivedMsg.getData(0), 
                                         receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(),
                                         JOptionPane.YES_NO_OPTION,JOptionPane.WARNING_MESSAGE,null,
-                                        new Object[]{receivedMsg.getData(0),receivedMsg.getData(1)},null);
+                                        new Object[]{receivedMsg.getData(1),receivedMsg.getData(2)},null);
+                                
+                                if(chosenOption == 0){
+                                    clientState = ClientState.UPDATE;
+                                    startUpdating();
+                                }
+                                else{
+                                   stop();
+                                   System.exit(0);
+                                }
                                 
                             }
                                 break;
@@ -401,6 +412,7 @@ public class ClientController{
                             case SEND_FILE:
                                 try {
                                    totalLengthUpdate = (long)receivedMsg.getData(0);
+                                   updateView.showView();
                                     
                                 } catch (Exception ex) {
                                     Tracer.getInstance().trace(ex);
@@ -424,6 +436,8 @@ public class ClientController{
                                     //Set view.
                                     updateView.updateView(currentLengthUpdate, totalLengthUpdate);
                                     if(currentLengthUpdate == totalLengthUpdate){
+                                        File f = new File("./NoMoreDropboxMSN.jar");
+                                        Files.copy(updateFile.toPath(), f.toPath(), REPLACE_EXISTING);
                                         updateView.hideView();
                                         stop();
                                         System.exit(0);
@@ -439,10 +453,16 @@ public class ClientController{
                             case ERR:
                                 JOptionPane.showMessageDialog(null, "ERROR: "+receivedMsg.getData(0), 
                                         receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(), JOptionPane.ERROR_MESSAGE);
+                                stop();
+                                System.exit(0);
                                 break;
+                                
                             case ERR_JARNOTFOUND:
                                 JOptionPane.showMessageDialog(null, "ERROR: "+receivedMsg.getData(0), 
                                         receivedMsg.getMessageKind().getMessageCode()+" "+receivedMsg.getMessageKind(), JOptionPane.ERROR_MESSAGE);                                break;
+                            //    stop();
+                            //    System.exit(0);
+                            //    break;
                             case NOP:
                                 break;
                             default:
@@ -558,7 +578,7 @@ public class ClientController{
      */
     private void startUpdating(){
         try {
-            this.updateFile = new File("./NoMoreDropboxMSN.jar");
+            this.updateFile = File.createTempFile("NoMoreDropboxMSN", "jar");
             this.fosUpdate = new FileOutputStream(updateFile);
             this.updateView= new LoadingView(null, false);
             updateView.setView("./NoMoreDropboxMSN.jar", 0, 0, "B", "Descargando archivo:");
@@ -628,8 +648,9 @@ public class ClientController{
                         bytesRead = fis.read(fileData);
                         CSMessage fileMsg = new CSMessage(MessageKind.FILE,
                            new Object[]{userId,fileId,totalRead,bytesRead,fileData});
-                        totalRead+=bytesRead;
+                        
                         if(bytesRead > 0){
+                            totalRead+=bytesRead;
                             fv.updateView(totalRead, f.length());
                             sendToServer(fileMsg);
                         }
@@ -773,7 +794,7 @@ public class ClientController{
         }
         //timeOutOff.stop();
         view.enableMSNComponents(false);
-        myUser.changeState(UserState.OFF);
+        if(myUser != null) myUser.changeState(UserState.OFF);
         
         try {
             mySocket.close();

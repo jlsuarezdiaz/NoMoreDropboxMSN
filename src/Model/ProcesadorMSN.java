@@ -109,7 +109,10 @@ class ProcesadorMSN extends Thread{
                         break;
                     case LOGOUT:   
                         if(remoteId >= 0) serverData.removeUser(Integer.valueOf(remoteId));
-                        else kill();
+                        else{
+                            serviceSocket.writeMessage(new CSMessage(MessageKind.BYE, null));
+                            kill();
+                        }
                         break;
 
                     case IMALIVE: 
@@ -211,12 +214,14 @@ class ProcesadorMSN extends Thread{
                     bytesRead = fis.read(fileData);
                     CSMessage fileMsg = new CSMessage(MessageKind.FILE,
                        new Object[]{-1,-1,totalRead,bytesRead,fileData});
-                    totalRead+=bytesRead;
+                    
                     if(bytesRead > 0){
+                        totalRead+=bytesRead;
                         serviceSocket.writeMessage(fileMsg);
                     }
                     Tracer.getInstance().trace(2,Long.toString(totalRead)+" B sent.");
                 }while(bytesRead >= 0);
+                fis.close();
                 
             }
             else{

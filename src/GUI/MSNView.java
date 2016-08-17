@@ -377,11 +377,11 @@ public class MSNView extends javax.swing.JFrame {
      * @return Array with selected messages.
      */
     public ArrayList<Message> getSelectedMessages(){
-       MessageView mv;
+       MessageableView mv;
        ArrayList<Message> msgs = new ArrayList();
        for(Component c : MessagePanel.getComponents()){
            try{
-           mv = (MessageView) c;
+           mv = (MessageableView) c;
            if(mv.isSelected())
                msgs.add(mv.getMessage());
            }
@@ -501,7 +501,7 @@ public class MSNView extends javax.swing.JFrame {
             msgs = new ArrayList();
             for(Component c: MessagePanel.getComponents()){
                 try{
-                    msgs.add(((MessageView)c).getMessage());
+                    msgs.add(((MessageableView)c).getMessage());
                 }
                 catch(ClassCastException ex){
                     MessagePanel.remove(c);

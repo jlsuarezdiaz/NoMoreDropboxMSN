@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 package GUI;
 
+import Model.Tracer;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -296,6 +297,23 @@ public class SettingsView extends javax.swing.JDialog {
      * @param evt 
      */
     private void BtCheatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtCheatActionPerformed
+        String cheat = txtCheat.getText();
+        String[] cheatArgs = cheat.split("\\s+");
+        
+        try{
+            switch(cheatArgs[0]){
+                case "DEBUG":
+                {
+                    Tracer.getInstance().setDebugLevel(Integer.parseInt(cheatArgs[1]));
+                }
+                break;
+                default:
+                break;
+            }
+        }
+        catch(Exception ex){
+            Tracer.getInstance().trace(ex);
+        }
         txtCheat.setText("");
     }//GEN-LAST:event_BtCheatActionPerformed
 

@@ -83,6 +83,11 @@ public class FileView extends MessageableView implements LoadableView{
         setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         setMaximumSize(new java.awt.Dimension(675, 115));
         setMinimumSize(new java.awt.Dimension(675, 115));
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
 
         iconLab.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Media/Extensions/_blank.png"))); // NOI18N
 
@@ -164,6 +169,7 @@ public class FileView extends MessageableView implements LoadableView{
 
     private void downloadBtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadBtActionPerformed
         JFileChooser fc = new JFileChooser();
+        fc.setSelectedFile(new File(fileLoading));
         int returnVal = fc.showSaveDialog(this);
         FileOutputStream fw = null;
         if(returnVal == JFileChooser.APPROVE_OPTION){
@@ -265,6 +271,10 @@ public class FileView extends MessageableView implements LoadableView{
                     break;
             }
     }//GEN-LAST:event_viewBtActionPerformed
+
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+        select(!isSelected);
+    }//GEN-LAST:event_formMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

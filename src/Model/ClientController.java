@@ -126,6 +126,11 @@ public class ClientController{
      */
     private long totalLengthUpdate;
     
+    /**
+     * Name for the update file.
+     */
+    private String updateFileName;
+    
     // ---------------------------------------------- //
     
     /**
@@ -170,6 +175,7 @@ public class ClientController{
         this.updateView = null;
         this.currentLengthUpdate = 0;
         this.totalLengthUpdate = 0;
+        this.updateFileName = null;
         
         reader();//Iniciamos la hebra lectora.
         
@@ -411,7 +417,9 @@ public class ClientController{
                         switch(receivedMsg.getMessageKind()){
                             case SEND_FILE:
                                 try {
-                                   totalLengthUpdate = (long)receivedMsg.getData(0);
+                                   updateFileName = (String) receivedMsg.getData(3);
+                                   totalLengthUpdate = (long)receivedMsg.getData(4);
+                                   updateView.setView(updateFileName, 0, totalLengthUpdate, "B", "Descargando archivo:");
                                    updateView.showView();
                                     
                                 } catch (Exception ex) {
@@ -436,7 +444,7 @@ public class ClientController{
                                     //Set view.
                                     updateView.updateView(currentLengthUpdate, totalLengthUpdate);
                                     if(currentLengthUpdate == totalLengthUpdate){
-                                        File f = new File("./NoMoreDropboxMSN.jar");
+                                        File f = new File(updateFileName);
                                         Files.copy(updateFile.toPath(), f.toPath(), REPLACE_EXISTING);
                                         updateView.hideView();
                                         stop();
@@ -581,7 +589,7 @@ public class ClientController{
             this.updateFile = File.createTempFile("NoMoreDropboxMSN", "jar");
             this.fosUpdate = new FileOutputStream(updateFile);
             this.updateView= new LoadingView(null, false);
-            updateView.setView("./NoMoreDropboxMSN.jar", 0, 0, "B", "Descargando archivo:");
+            
             sendToServer(new CSMessage(MessageKind.UPDATE_DOWNLOAD, null));
         } catch (Exception ex) {
             Tracer.getInstance().trace(ex);
@@ -765,9 +773,10 @@ public class ClientController{
     
     public void stop() {
         if(clientState == ClientState.OFF) return;
+        clientState = ClientState.DISCONNECTING;
         CSMessage sendMsg = new CSMessage(MessageKind.LOGOUT,new Object[]{});
         sendToServer(sendMsg);
-        clientState = ClientState.DISCONNECTING;
+        
         
         updater.stop();
         

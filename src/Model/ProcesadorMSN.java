@@ -203,7 +203,10 @@ class ProcesadorMSN extends Thread{
             File f = new File("./NoMoreDropboxMSN.jar");
             
             if(f.exists()){
-                serviceSocket.writeMessage(new CSMessage(MessageKind.SEND_FILE, new Object[]{f.length()}));
+                String versionNumber = Data.Txt.VERSION;
+                versionNumber = versionNumber.replace('.', '_');
+                serviceSocket.writeMessage(new CSMessage(MessageKind.SEND_FILE, new Object[]
+                    {null,-1,-1,"NoMoreDropboxMSN"+versionNumber+".jar",f.length()}));
                 
                 final int fileLengthSize = 50000;
                 FileInputStream fis = new FileInputStream(f);

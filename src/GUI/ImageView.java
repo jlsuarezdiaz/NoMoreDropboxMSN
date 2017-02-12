@@ -8,6 +8,8 @@ package GUI;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,10 @@ import javax.swing.ImageIcon;
  * @author Juan Luis
  */
 public class ImageView extends javax.swing.JDialog {
+    /**
+     * Image read.
+     */
+    private BufferedImage img;
 
     /**
      * Creates new form ImageView
@@ -29,9 +35,18 @@ public class ImageView extends javax.swing.JDialog {
     }
     
     public void setView(File f) throws IOException{
-        BufferedImage img = ImageIO.read(f);
+        img = ImageIO.read(f);
         //this.setSize(img.getWidth()+10, img.getHeight()+10);
         //System.out.println(img.getWidth()+","+img.getHeight());
+        //img.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+        
+        double scaleFactor = (Integer.max(img.getHeight(),img.getWidth()) <= 800)?1.0:750.0/((double)Integer.max(img.getHeight(),img.getWidth()));
+        if(scaleFactor != 1.0) scale(scaleFactor);
+        
+        setImage();
+    }
+    
+    private void setImage(){
         this.imageLab.setSize(img.getWidth(),img.getHeight());
         this.imageLab.setMinimumSize(new Dimension(img.getWidth(), img.getHeight()));
         this.imageLab.setMaximumSize(new Dimension(img.getWidth(), img.getHeight()));
@@ -44,7 +59,27 @@ public class ImageView extends javax.swing.JDialog {
         pack();
         this.repaint();
         this.revalidate();
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
+    }
+    
+    private void scale(double f){
+        scale(f,f);
+    }
+    
+    private void scale(double sw, double sh){
+        BufferedImage before = img;
+        int bw = before.getWidth();
+        int bh = before.getHeight();
+        Double nw = sw*bw;
+        Double nh = sh*bh;
+        
+        img = new BufferedImage(nw.intValue(), nh.intValue(), BufferedImage.TYPE_INT_ARGB);
+        AffineTransform at = new AffineTransform();
+        at.scale(sw,sh);
+        AffineTransformOp scaleOp = 
+            new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
+        img = scaleOp.filter(before,img);
     }
 
     /**
@@ -57,10 +92,32 @@ public class ImageView extends javax.swing.JDialog {
     private void initComponents() {
 
         imageLab = new javax.swing.JLabel();
+        btPlusZoom = new javax.swing.JButton();
+        btMinusZoom = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Media/msn_icon.png")));
         setResizable(false);
+
+        btPlusZoom.setBackground(new java.awt.Color(0, 51, 255));
+        btPlusZoom.setFont(new java.awt.Font("Tahoma", 1, 20)); // NOI18N
+        btPlusZoom.setForeground(new java.awt.Color(255, 255, 255));
+        btPlusZoom.setText("+");
+        btPlusZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btPlusZoomActionPerformed(evt);
+            }
+        });
+
+        btMinusZoom.setBackground(new java.awt.Color(0, 51, 255));
+        btMinusZoom.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        btMinusZoom.setForeground(new java.awt.Color(255, 255, 255));
+        btMinusZoom.setText("-");
+        btMinusZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btMinusZoomActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -68,23 +125,45 @@ public class ImageView extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(imageLab, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(imageLab, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btPlusZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btMinusZoom, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(imageLab, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(imageLab)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btMinusZoom, javax.swing.GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
+                    .addComponent(btPlusZoom, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btPlusZoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btPlusZoomActionPerformed
+        scale(1.1);
+        setImage();
+    }//GEN-LAST:event_btPlusZoomActionPerformed
+
+    private void btMinusZoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btMinusZoomActionPerformed
+        scale(0.9);
+        setImage();
+    }//GEN-LAST:event_btMinusZoomActionPerformed
+
   
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btMinusZoom;
+    private javax.swing.JButton btPlusZoom;
     private javax.swing.JLabel imageLab;
     // End of variables declaration//GEN-END:variables
 }

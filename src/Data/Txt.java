@@ -54,21 +54,24 @@ public class Txt {
             "\n- Añadidos mecanismos para la actualización automática del programa.\n\n"+
             "Versión 3.3 (5/7/2016):"+
             "\n- Añadido el envío de archivos."+
-            "\n- Añadida visualización de archivos de audio, imagen y texto plano.\n\n"
+            "\n- Añadida visualización de archivos de audio, imagen y texto plano.\n\n"+
+            "Versión 4.0 (17/8/2016):"+
+            "\n- Reestructuración interna y mejora del protocolo de comunicación."+
+            "\n- Mejora en el envío de archivos. Envíos concurrentes."+
+            "\n- Solucionados errores con las desconexiones."+
+            "\n- Añadidos nuevos mecanismos de depuración: clase rastreadora."+
+            "\n- Nuevos comandos en el servidor."+
+            "\n- Ligeras mejoras en la interfaz gráfica."+
+            "\n- Cheats para depuración en cliente.\n\n"
             ;
     
     /**
      * String with info about last version.
      */
     public static final String LAST_VERSION_INFO =
-        "Versión 4.0 (17/8/2016):"+
-        "\n- Reestructuración interna y mejora del protocolo de comunicación."+
-        "\n- Mejora en el envío de archivos. Envíos concurrentes."+
-        "\n- Solucionados errores con las desconexiones."+
-        "\n- Añadidos nuevos mecanismos de depuración: clase rastreadora."+
-        "\n- Nuevos comandos en el servidor."+
-        "\n- Ligeras mejoras en la interfaz gráfica."+
-        "\n- Cheats para depuración en cliente.\n\n";
+        "Versión 4.1 (XX/X/2017):"+
+        "\n- Añadido escalado de imágenes."+
+        "\n\n"
     ;
     
     /**
@@ -84,7 +87,7 @@ public class Txt {
     /**
      * Version's data and compatibilities.
      */
-    public static final double VERSION_CODE = 4.0;
+    public static final double VERSION_CODE = 4.1;
     public static final double LAST_COMPATIBLE = 4.0;
     
     /**

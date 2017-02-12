@@ -71,6 +71,7 @@ public class Txt {
     public static final String LAST_VERSION_INFO =
         "Versión 4.1 (XX/X/2017):"+
         "\n- Añadido escalado de imágenes."+
+        "\n- Añadido envío de notas de voz."+
         "\n\n"
     ;
     

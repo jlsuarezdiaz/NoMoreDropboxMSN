@@ -81,6 +81,10 @@ public class ClientController{
      */
     private boolean[] selected = new boolean[User.getMaxUsers()];
     
+    /**
+     * Private mode.
+     */
+    private volatile boolean privateMode;
     
     /* The reference for this instance of this object */
     private ClientController clientControllerInstance;
@@ -176,6 +180,8 @@ public class ClientController{
         this.currentLengthUpdate = 0;
         this.totalLengthUpdate = 0;
         this.updateFileName = null;
+        
+        this.privateMode = false;
         
         reader();//Iniciamos la hebra lectora.
         
@@ -322,6 +328,7 @@ public class ClientController{
                                 break;
                             case OK_PRIV:
                                 view.setPrivate((boolean)receivedMsg.getData(0));
+                                privateMode = (boolean)receivedMsg.getData(0);
                                 break;
                             case OK_SLCT:
                                 selected[(int)receivedMsg.getData(0)]=(boolean)receivedMsg.getData(1);
@@ -578,6 +585,7 @@ public class ClientController{
             userName = intro.getUser();
             this.myUser = new User(userName);
         }
+        this.privateMode=false;
         sendToServer(new CSMessage(MessageKind.LOGIN, new Object[]{myUser.getName()}));
     }
     
@@ -629,6 +637,14 @@ public class ClientController{
         
         sendMsg.addHeader("Tú"+((isPrivate)?" (PRIVADO): ":": "));
         mv.setMessage(sendMsg);
+    }
+    
+    public void send(String message){
+        send(message,privateMode);
+    }
+    
+    public void sendFile(File f, String msg){
+        sendFile(f,msg,privateMode);
     }
     
     public void sendFile(File f, String msg, boolean isPrivate){

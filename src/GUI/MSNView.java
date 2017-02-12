@@ -1025,7 +1025,9 @@ public class MSNView extends javax.swing.JFrame {
     }//GEN-LAST:event_BtSendFileActionPerformed
 
     private void BtSendAudioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtSendAudioActionPerformed
-        // TODO add your handling code here:
+        RecAudioView rav = new RecAudioView(this,false);
+        rav.setClientControllerInstance(msn_ctrl);
+        rav.setVisible(true);
     }//GEN-LAST:event_BtSendAudioActionPerformed
 
     

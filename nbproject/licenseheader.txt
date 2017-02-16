@@ -1,0 +1,9 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}Author: Juan Luis Suárez Díaz
+${licensePrefix}July, 2016
+${licensePrefix}No More Dropbox MSN
+<#if licenseLast??>
+${licenseLast}
+</#if>

@@ -6,6 +6,7 @@
 package Model;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -50,6 +51,7 @@ public class MSNSocket {
     public MSNSocket(String host, int port) throws IOException{
         this.socket = new Socket(host, port);
         this.oos = new ObjectOutputStream(socket.getOutputStream());
+        oos.flush();
         this.ois = new ObjectInputStream(socket.getInputStream());
     }
     
@@ -60,6 +62,7 @@ public class MSNSocket {
     public MSNSocket(Socket socket) throws IOException{
         this.socket = socket;
         this.oos = new ObjectOutputStream(socket.getOutputStream());
+        oos.flush();
         this.ois = new ObjectInputStream(socket.getInputStream());
     }
     
